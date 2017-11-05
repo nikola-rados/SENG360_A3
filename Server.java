@@ -15,6 +15,28 @@ public class Server
 	public static int Authentication;
 	public static int Integrity;
 	public static int Confidentiality;
+	
+	public static void selected(int c, int i, int a){
+		System.out.println("You have Selected the Following:");
+		if (c==0){
+			System.out.println("\tYou do not want Confidentiality");
+		}else{
+			System.out.println("\tYou want Confidentiality");
+		}
+		if (i==0){
+			System.out.println("\tYou do not want Integrity");
+		}else{
+			System.out.println("\tYou want Integrity");
+		}
+		if (a==0){
+			System.out.println("\tYou do not want Authentication");
+		}else{
+			System.out.println("\tYou want Authentication");
+		}
+		
+		
+		
+	}
     public static void main(String[] args){
         try{
 
@@ -23,18 +45,19 @@ public class Server
             ServerSocket serverSocket = new ServerSocket(port);
 
             System.out.println("Server Side Running, requires information:");
-			System.out.print("Do you want Authentication? \nPlease type '0' for no and '1' for yes:"); 
-			Scanner sc = new Scanner(System.in);
-			Authentication = sc.nextInt();
+			System.out.print("Do you want Confidentiality? \nPlease type '0' for no and '1' for yes:");
+			Scanner sc = new Scanner(System.in);			
+			Confidentiality = sc.nextInt();
 			System.out.print("Do you want Integrity? \nPlease type '0' for no and '1' for yes:"); 
 			Integrity = sc.nextInt();
-			System.out.print("Do you want Confidentiality? \nPlease type '0' for no and '1' for yes:"); 
-			Confidentiality = sc.nextInt();
-			
+			System.out.print("Do you want Authentication? \nPlease type '0' for no and '1' for yes:"); 
+			Authentication = sc.nextInt();
+
+			selected(Confidentiality,Integrity,Authentication);
 			System.out.println("Server Started and listening to the port 7802");
 
             //Server is running always. This is done using this while(true) loop
-/*			while(true)
+			while(true)
             {
                 //Reading the message from the client
                 socket = serverSocket.accept();
@@ -42,10 +65,7 @@ public class Server
 				InputStreamReader isr = new InputStreamReader(is);
                 BufferedReader br = new BufferedReader(isr);
                 String recived = br.readLine();
-*/
-
-
-/*             String returnMessage;
+				String returnMessage;
 				returnMessage="hello";
 
                 //Sending the response back to the client.
@@ -55,9 +75,9 @@ public class Server
                 bw.write(returnMessage);
                 System.out.println("Message sent to the client is "+returnMessage);
                 bw.flush();
-*/          
+          
        }
-        catch (Exception e)
+        }catch (Exception e)
         {
             e.printStackTrace();
         }
