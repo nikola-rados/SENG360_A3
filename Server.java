@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import javax.crypto.*;
 
 public class Server
 {
@@ -17,7 +18,7 @@ public class Server
 	public static int Confidentiality;
 	
 	public static void selected(int c, int i, int a){
-		System.out.println("You have Selected the Following:");
+		System.out.println("\nYou have Selected the Following:");
 		if (c==0){
 			System.out.println("\tYou do not want Confidentiality");
 		}else{
@@ -37,36 +38,48 @@ public class Server
 		
 		
 	}
-    public static void main(String[] args){
+	
+	
+	
+public static void commands(){
+	        System.out.println("Server Side Running, requires information:\n");
+
+			System.out.print("Do you want Confidentiality? \nPlease type '0' for no and '1' for yes:");
+			Scanner sc = new Scanner(System.in);			
+			Confidentiality = sc.nextInt();
+				if(Confidentiality!=0 && Confidentiality!= 1){
+					System.out.println("Invalid input");
+					System.exit(0);
+				}
+			System.out.print("Do you want Integrity? \nPlease type '0' for no and '1' for yes:"); 
+			Integrity = sc.nextInt();
+				if(Integrity!=0 && Integrity!= 1){
+						System.out.println("Invalid input");
+						System.exit(0);
+				}
+			System.out.print("Do you want Authentication? \nPlease type '0' for no and '1' for yes:"); 
+			Authentication = sc.nextInt();
+				if(Authentication!=0 && Authentication!= 1){
+						System.out.println("Invalid input");
+						System.exit(0);
+				}
+			selected(Confidentiality,Integrity,Authentication);
+}
+
+
+
+public static void main(String[] args){
         try{
 
             int port = 7802;
 
             ServerSocket serverSocket = new ServerSocket(port);
+			commands();
+			System.out.println("\nServer Started and listening to the port 7802");
 
-            System.out.println("Server Side Running, requires information:");
-<<<<<<< HEAD
-			System.out.print("Do you want Authentication? \nPlease type '0' for no and '1' for yes:");
-			Scanner sc = new Scanner(System.in);
-			Authentication = sc.nextInt();
-			System.out.print("Do you want Integrity? \nPlease type '0' for no and '1' for yes:");
-			Integrity = sc.nextInt();
-			System.out.print("Do you want Confidentiality? \nPlease type '0' for no and '1' for yes:");
-			Confidentiality = sc.nextInt();
-
-=======
-			System.out.print("Do you want Confidentiality? \nPlease type '0' for no and '1' for yes:");
-			Scanner sc = new Scanner(System.in);			
-			Confidentiality = sc.nextInt();
-			System.out.print("Do you want Integrity? \nPlease type '0' for no and '1' for yes:"); 
-			Integrity = sc.nextInt();
-			System.out.print("Do you want Authentication? \nPlease type '0' for no and '1' for yes:"); 
-			Authentication = sc.nextInt();
-
-			selected(Confidentiality,Integrity,Authentication);
->>>>>>> 6767863639edf751a5eb549166f04067a70418c0
-			System.out.println("Server Started and listening to the port 7802");
-
+			
+			
+			
             //Server is running always. This is done using this while(true) loop
 			while(true)
             {
@@ -76,12 +89,13 @@ public class Server
 				InputStreamReader isr = new InputStreamReader(is);
                 BufferedReader br = new BufferedReader(isr);
                 String recived = br.readLine();
-<<<<<<< HEAD
+				
+				
+				
+				
 
-                String returnMessage;
-=======
 				String returnMessage;
->>>>>>> 6767863639edf751a5eb549166f04067a70418c0
+
 				returnMessage="hello";
 
                 //Sending the response back to the client.
@@ -91,17 +105,10 @@ public class Server
                 bw.write(returnMessage);
                 System.out.println("Message sent to the client is "+returnMessage);
                 bw.flush();
-<<<<<<< HEAD
 
-            }
-
-        }
-        catch (Exception e)
-=======
           
        }
         }catch (Exception e)
->>>>>>> 6767863639edf751a5eb549166f04067a70418c0
         {
             e.printStackTrace();
         }
