@@ -1,3 +1,27 @@
+/*
+SENG 360 Fall 2017
+Assignment 3 
+
+
+
+Things to keep in mind:
+
+
+	You should compare the (hashed) password to a password hash in a protected (access controlled) directory. 
+
+	When I talk about "protected directory", I am referring to a directory that is access controlled, so that it is not accessible to the world.
+	
+	
+	Integrity just ensures that the message has not been changed while in transit between client and server. You can ensure this by using message authentication codes (with AES) (see your question 5).
+
+	Authentication also requires that users authenticate. This can be done using a password authentication on client and server, respectively.
+	
+	
+	
+	
+*/
+
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStream;
@@ -8,6 +32,9 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javax.crypto.*;
+import java.security.Provider;
+import javax.crypto.Cipher;
+
 
 public class Server
 {
@@ -75,7 +102,7 @@ public static void main(String[] args){
 
             ServerSocket serverSocket = new ServerSocket(port);
 			commands();
-			System.out.println("\nServer Started and listening to the port 7802");
+			System.out.println("\nServer Started and listening to the port 7802\nReady for a client connection.");
 
 			
 			
