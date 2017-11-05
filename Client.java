@@ -2,6 +2,9 @@ import java.util.Scanner;
 import java.util.NoSuchElementException;
 import java.io.PrintStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.BufferedWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -9,15 +12,21 @@ import java.net.UnknownHostException;
 public class Client {
 
     public static void main(String[] args) throws UnknownHostException, IOException {
-        int CIA = getCIA();
-        System.out.println(CIA);
-
         String msg, temp;
+
+        // ask for client triad
+        int CIA = getCIA();
+        //System.out.println(CIA);
 
         Scanner scan = new Scanner(System.in);
         Socket socket = new Socket("127.0.0.1", 7802);
         Scanner scan1 = new Scanner(socket.getInputStream());
 
+        // send server message containing triad number to check security protocols
+        PrintStream cia_check = new PrintStream(socket.getOutputStream());
+        cia_check.println(CIA);
+
+        // instant message
         System.out.println("Enter a message:\n");
         msg = scan.nextLine();
         PrintStream p = new PrintStream(socket.getOutputStream());
