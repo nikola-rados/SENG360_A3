@@ -272,9 +272,9 @@ public static void main(String[] args){
 				
 				
 				if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
-					boolean checking_authentication =true;
+/*					boolean checking_authentication =true;
 					while(checking_authentication){
-						socket = serverSocket.accept();
+*/						socket = serverSocket.accept();
 						OutputStream check_authen = socket.getOutputStream();
 						OutputStreamWriter check_authent = new OutputStreamWriter(check_authen);
 						BufferedWriter authen = new BufferedWriter(check_authent);
@@ -286,9 +286,9 @@ public static void main(String[] args){
 /*						InputStreamReader isr =  InputStreamReader(is);
 						BufferedReader br =  BufferedReader(isr);
 						String recived_1 = br.readLine();
-*/					
+					
 					}
-					//	Authentication_check();
+*/					//	Authentication_check();
 				}else{
 						
 				}
