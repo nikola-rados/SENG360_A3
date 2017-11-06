@@ -9,33 +9,33 @@ import java.net.UnknownHostException;
 public class Client {
 
     public static void main(String[] args) throws UnknownHostException, IOException {
-        int CIA = getCIA();
-        System.out.println(CIA);
-
-        String msg, temp;
-
-        Scanner scan = new Scanner(System.in);
+        String msg, server_str;
+        Scanner scan_client = new Scanner(System.in);
         Socket socket = new Socket("127.0.0.1", 7802);
-        Scanner scan1 = new Scanner(socket.getInputStream());
+        Scanner scan_server = new Scanner(socket.getInputStream());
+
+        int cia = getCIA();
+        //System.out.println(cia);
 
         // send server message containing triad number to check security protocols
         PrintStream cia_check = new PrintStream(socket.getOutputStream());
-        cia_check.println(CIA);
+        cia_check.println(cia);
 
-        // instant message
-/*
-        System.out.println("Enter a message:\n");
-        msg = scan.nextLine();
-        PrintStream p = new PrintStream(socket.getOutputStream());
-        p.println(msg);
-*/
+        // listen for a response from the server
         try {
-            temp = scan1.nextLine();
-            System.out.println(temp);
+            server_str = scan_server.nextLine();
+            System.out.println("Server: " + server_str);
         }
         catch(NoSuchElementException e) {
-            System.out.println("--- No message found ---");
+            System.out.println("--- No message ---");
         }
+
+        //test || once we finish listening for a message prompt the user and send the server a message back.
+        System.out.print("Client: ");
+        msg = scan_client.nextLine();
+        System.out.println(msg);
+        PrintStream client_out = new PrintStream(socket.getOutputStream());
+        client_out.println(msg);
     }
 
     // prompts user for with security options

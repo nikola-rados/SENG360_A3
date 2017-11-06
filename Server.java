@@ -1,22 +1,22 @@
 /*
 SENG 360 Fall 2017
-Assignment 3 
+Assignment 3
 
 
 
 Things to keep in mind:
 
 
-	You should compare the (hashed) password to a password hash in a protected (access controlled) directory. 
+	You should compare the (hashed) password to a password hash in a protected (access controlled) directory.
 
 	When I talk about "protected directory", I am referring to a directory that is access controlled, so that it is not accessible to the world.
-	
-	
+
+
 	Integrity just ensures that the message has not been changed while in transit between client and server. You can ensure this by using message authentication codes (with AES) (see your question 5).
 
 	Authentication also requires that users authenticate. This can be done using a password authentication on client and server, respectively.
-	
-	
+
+
 TO do:
 
 	when values are equal:
@@ -28,8 +28,8 @@ TO do:
 	6 - 110
 	7 - 111
 	0 - 000
-	
-	
+
+
 */
 
 
@@ -63,40 +63,40 @@ public class Server{
 	public static int Command_total;
 	public static boolean Running = true;
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // unused
 private static void commands(){
 	        System.out.println("Server Side Running, requires information:\n");
 
 			System.out.print("Do you want Confidentiality? \nPlease type 'n' for no and 'y' for yes:");
-			Scanner sc = new Scanner(System.in);			
+			Scanner sc = new Scanner(System.in);
 			Confidentiality = sc.nextInt();
 				if(Confidentiality!=0 && Confidentiality!= 1){
 					System.out.println("Invalid input");
 					System.exit(0);
 				}
-			System.out.print("Do you want Integrity? \nPlease type 'n' for no and 'y' for yes:"); 
+			System.out.print("Do you want Integrity? \nPlease type 'n' for no and 'y' for yes:");
 			Integrity = sc.nextInt();
 				if(Integrity!=0 && Integrity!= 1){
 						System.out.println("Invalid input");
 						System.exit(0);
 				}
-			System.out.print("Do you want Authentication? \nPlease type 'n' for no and 'y' for yes:"); 
+			System.out.print("Do you want Authentication? \nPlease type 'n' for no and 'y' for yes:");
 			Authentication = sc.nextInt();
 				if(Authentication!=0 && Authentication!= 1){
 						System.out.println("Invalid input");
@@ -193,48 +193,39 @@ public static void main(String[] args){
 			selected();
 			System.out.println("\nServer Started and listening to the port 7802\nReady for a client connection.");
 //			check_cia(Command_total); //will wait here until done
-			
+
+
 			socket = serverSocket.accept();
 			Scanner scan1 = new Scanner(socket.getInputStream());
 			PrintStream p = new PrintStream(socket.getOutputStream());
 //			while(Running){
 			while(Running){
 					//Reading the message from the client
-					
+
 				String recived_1;
 				recived_1 = scan1.nextLine();
 				int recived = Integer.parseInt(recived_1);
-					
-			
-			
+
+
+
 				String returnMessage;
 				if(recived==Command_total){
 					returnMessage = "That was correct";
-					
+
 				//	Running =false;
 				}else{
 					returnMessage = "Selected security properties was not the same";
 				}
-				
-				
+
+
 				p.println(returnMessage);
 				System.out.println("Sent message to client: "+returnMessage);
 			//	recived_1 = scan1.nextLine();
 
 
-		/*		
-				//Sending the response back to the client.
-				OutputStream os = socket.getOutputStream();
-				OutputStreamWriter osw = new OutputStreamWriter(os);
-				BufferedWriter bw = new BufferedWriter(osw);
-				bw.write(returnMessage);
-				bw.flush();
-				
-		*/		
 				if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
 					boolean checking_authentication =true;
 					while(checking_authentication){
-	
 						p.println("Please input Username:");
 						System.out.println("Message sent to the client is: Please input Username");
 						recived_1 = scan1.nextLine();
@@ -252,23 +243,24 @@ public static void main(String[] args){
 						authen.write("Please input Username:");
 						System.out.println("Message sent to the client is: Please input Username");
 */
-						/*						
+						/*
 						socket = serverSocket.accept();
-		
+
 						InputStream is_user = socket.getInputStream();
 						InputStreamReader isr_user =  InputStreamReader(is_user);
 						BufferedReader br_user =  BufferedReader(isr_user);
 						recived_1 = br_user.readLine();
+<<<<<<< HEAD
 */					
 					}
 					//	Authentication_check();
 				}else{
-						
+
 				}
-				Running =false;	
+				Running =false;
 			}
-			
-				
+
+
 /*			Scanner exiter = new Scanner(System.in);
 			char exit_test;
 			System.out.println("Do you want to exit? (y/n)");
@@ -276,12 +268,12 @@ public static void main(String[] args){
                 if(exit_test == 'y') {
 					Running =false;
 				}else{
-					
+
 				}
 */
 //			}
-	
-	
+
+
         }catch (Exception e){
             e.printStackTrace();
         }finally{
@@ -289,6 +281,21 @@ public static void main(String[] args){
                 socket.close();
             }catch(Exception e){}
         }
-    }
-}
-
+        int i = 0;
+        while(true) {
+            if(i == 0) {
+                System.out.print("Waiting\r");
+                i++;
+            } else if (i == 1) {
+                System.out.print("Waiting.\r");
+                i++;
+            } else if (i == 2) {
+                System.out.print("Waiting..\r");
+                i++;
+            } else {
+                System.out.print("Waiting...\r");
+                i = 0;
+            }
+        } // end while
+    } // end main
+} // end class Server
