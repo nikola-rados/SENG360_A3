@@ -69,7 +69,7 @@ public class Server{
 	public static int Confidentiality;
 	public static int Command_total;
 	public static boolean Running = true;
-	private static String filename = "user/password.txt";
+	private static String filename = "userpassword.txt";
 
 
 // unused
@@ -169,25 +169,31 @@ private static int getCIA() {
 }
 
 
+
+/**
+*
+* Reference: https://stackoverflow.com/questions/5868369/how-to-read-a-large-text-file-line-by-line-using-java
+*/
 public static boolean check_user(String name, String pword){
-	if(name=="Nik"){
+	try{
+		BufferedReader br = new BufferedReader(new FileReader(filename));
+		String nl,pl;  //nl is name line, pl is password line
+		while ((nl = br.readLine()) != null) {
+			pl = br.readLine();
+			if (nl.equals(name)) {
+				if(pl.equals(pword)){
+					return true;
+				}
+			}
+		}
+				
 		return false;
-	}else{
-		return true;
+	}catch(IOException ex){
+		
 	}
+	return false;
 }
 
-public static void checkFile(String filename) {
-	File f = new File(filename);
-		if (!f.exists()) {
-            try {
-                System.out.println("Creating file");
-                f.createNewFile();
-            } catch (IOException ex) {
-				System.out.println("Should ");
-			}
-        }
-}
 	
 public static void main(String[] args){
         try{
@@ -243,8 +249,8 @@ public static void main(String[] args){
 						}
 
 						if (check_user(user,password)){
-							filename = "user/password.txt";
-							checkFile(filename);
+							filename = "userpassword.txt";
+							System.out.println("Message sent to the client is: User and Password accepted");
 							checking_authentication=false;
 						}else{
 							p.println("Username/Password is not vaild please try again");
@@ -268,7 +274,7 @@ public static void main(String[] args){
                 socket.close();
             }catch(Exception e){}
         }
-        int i = 0;
+ /*       int i = 0;
         while(true) {
             if(i == 0) {
                 System.out.print("Waiting\r");
@@ -283,6 +289,6 @@ public static void main(String[] args){
                 System.out.print("Waiting...\r");
                 i = 0;
             }
-        } // end while
+        } // end while*/
     } // end main
 } // end class Server
