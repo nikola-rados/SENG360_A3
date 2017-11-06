@@ -51,7 +51,6 @@ public class Client {
             }
 
             // send messag to Server
-            System.out.println(msg);
             PrintStream client_out = new PrintStream(socket.getOutputStream());
             client_out.println(msg);
         }

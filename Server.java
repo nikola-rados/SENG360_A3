@@ -223,8 +223,7 @@ public static void main(String[] args){
 				p.println(returnMessage);
 				System.out.println("Sent message to client: "+returnMessage);
 			//	recived_1 = scan1.nextLine();
-                break;
-/*
+
 				if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
 					boolean checking_authentication =true;
 					while(checking_authentication){
@@ -247,7 +246,7 @@ public static void main(String[] args){
 				}else{
 
 				}
-				Running =false;*/
+				Running =false;
 			}//running while
 
 
