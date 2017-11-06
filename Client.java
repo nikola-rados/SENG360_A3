@@ -37,9 +37,12 @@ public class Client {
             // first iteration needs to check for the confirmation message
             if(server_str.contains("accepted")) {
                 continue;
-            } else if (server_str.contains("denied")){
+            } else if(server_str.contains("denied")){
                 System.out.println("Exiting Program...");
                 break;
+            // this checks for the password retry and goes to next loop
+            } else if(server_str.contains("Username/Password is not vaild please try again")) {
+                continue;
             }
 
             // After Server responds, user can respond
