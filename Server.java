@@ -47,7 +47,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 
 /* MAIN SERVER CLASS */
@@ -60,6 +63,8 @@ public class Server{
 	public static int Command_total;
 	public static boolean Running = true;
 	private static String filename = "userpassword.txt";
+    private static final String DEFAULT_USER = "seng360";
+    private static final String DEFAULT_PASS = "assignment3";
 
     /**
      *  This is the method that confirms what was requested
@@ -150,6 +155,70 @@ public class Server{
     }
 
 
+    /*
+     *  Generate the default setting for password which will be:
+     *  Username: seng360
+     *  Password: assignment3
+     *  These will be hashed using SHA-256, which is a secure hashing algorithm.
+     */
+    private static void generateUserPass(String username, String password) {
+        MessageDigest mdUser, mdPass;
+        StringBuffer sbUser = new StringBuffer();
+        StringBuffer sbPass = new StringBuffer();
+
+        // Create instances
+        try {
+            mdUser = MessageDigest.getInstance("SHA-256");
+            mdPass = MessageDigest.getInstance("SHA-256");
+            mdUser.update(username.getBytes());
+            mdPass.update(password.getBytes());
+            byte byteDataUser[] = mdUser.digest();
+            byte byteDataPass[] = mdPass.digest();
+
+            // convert username to hex
+            for(int i = 0; i < byteDataUser.length; i++) {
+                sbUser.append(Integer.toString((byteDataUser[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            // convert password to hex
+            for(int i = 0; i < byteDataPass.length; i++) {
+                sbPass.append(Integer.toString((byteDataPass[i] & 0xff) + 0x100, 16).substring(1));
+            }
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("Fatal Error: Algorithm not available");
+            System.exit(0);
+        }
+        writeToFile(sbUser.toString(), sbPass.toString());
+    }
+
+    //private helper method
+    private static void writeToFile(String username, String password) {
+        // first we need to create the file
+        File f = new File("secure.txt");
+        try {
+            boolean f_check = f.createNewFile();
+            if(f_check) {
+                System.out.println("File has been created successfully");
+            } else {
+                System.out.println("File already present at the specified location");
+            }
+        } catch (IOException e) {
+           System.out.println("Error creating file");
+           e.printStackTrace();
+        }
+
+        // then we write the default values to it
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+            writer.write(username);
+            writer.write(password);
+            writer.close();
+            System.out.println("Successfully wrote to file");
+        } catch(IOException e) {
+            System.out.println("Error: Could not write to file");
+        }
+
+    }
+
     public static void main(String[] args) {
         try {
             int port = 7802;
@@ -178,8 +247,10 @@ public class Server{
 
 				String user = "unknown";
 				String password = "unknown";
-				if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
-					boolean checking_authentication =true;
+                // Authentication
+				if (Command_total%2 == 1){
+                    generateUserPass(DEFAULT_USER, DEFAULT_PASS);
+					boolean checking_authentication = true;
 					while(checking_authentication){
 						p.println("Please input Username:");
 						System.out.println("Message sent to the client is: Please input Username");
@@ -205,8 +276,6 @@ public class Server{
 						}else{
 							p.println("Username/Password is not vaild please try again");
 						}
-
-
 					}//while(checking authentication)
 				}else{
 					System.out.println("Since Authentication was not choosen the defualt username and password are UNKNOWN");
