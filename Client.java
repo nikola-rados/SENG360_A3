@@ -18,6 +18,13 @@ public class Client {
         Socket socket = new Socket("127.0.0.1", 7802);
         Scanner scan1 = new Scanner(socket.getInputStream());
 
+        // send server message containing triad number to check security protocols
+        PrintStream cia_check = new PrintStream(socket.getOutputStream());
+        cia_check.println(CIA);
+
+        //there is a change to be made here
+
+        // instant message
         System.out.println("Enter a message:\n");
         msg = scan.nextLine();
         PrintStream p = new PrintStream(socket.getOutputStream());
