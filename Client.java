@@ -75,15 +75,13 @@ public class Client {
                 System.out.println("Would you like Confidentiality? (y/n)");
                 val = 4;
             // Integrity
-            } else if (i == 1) {
+            } else if(i == 1) {
                 System.out.println("Would you like Integrity? (y/n)");
                 val = 2;
             // Authentication
-            } else if (i == 2) {
+            } else if(i == 2) {
                 System.out.println("Would you like Authentication? (y/n)");
                 val = 1;
-            } else {
-                //we should never get here
             }
 
             // loop to prompt user

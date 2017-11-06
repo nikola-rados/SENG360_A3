@@ -1,38 +1,34 @@
 /*
-SENG 360 Fall 2017
-Assignment 3
+ *  SENG 360
+ *  Fall 2017
+ *  Assignment 3
+ *  Russell Snelgrove (V00)
+ *  Nikola Rados (V00801209)
+ *  Things to keep in mind:
+ *
+ *
+ *  You should compare the (hashed) password to a password hash in a protected
+ *  (access controlled) directory. When I talk about "protected directory", I am
+ *  referring to a directory that is access controlled, so that it is not
+ *  accessible to the world. Integrity just ensures that the message has not been
+ *  changed while in transit between client and server. You can ensure this by
+ *  using message authentication codes (with AES) (see your question 5).
+ * 	Authentication also requires that users authenticate. This can be done using a
+ *  password authentication on client and server, respectively.
+ *
+ * 	Possible CIA combinations:
+ * 	0 -> 000 -> ---
+ * 	1 -> 001 -> --A
+ * 	2 -> 010 -> -I-
+ * 	3 -> 011 -> -IA
+ * 	4 -> 100 -> C--
+ * 	5 -> 101 -> C-A
+ * 	6 -> 110 -> CI-
+ * 	7 -> 111 -> CIA
+ */
 
 
-
-Things to keep in mind:
-
-
-	You should compare the (hashed) password to a password hash in a protected (access controlled) directory.
-
-	When I talk about "protected directory", I am referring to a directory that is access controlled, so that it is not accessible to the world.
-
-
-	Integrity just ensures that the message has not been changed while in transit between client and server. You can ensure this by using message authentication codes (with AES) (see your question 5).
-
-	Authentication also requires that users authenticate. This can be done using a password authentication on client and server, respectively.
-
-
-TO do:
-
-	when values are equal:
-	1 - 001
-	2 - 010
-	3 - 011
-	4 - 100
-	5 - 101
-	6 - 110
-	7 - 111
-	0 - 000
-
-
-*/
-
-
+/* IMPORTS */
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStream;
@@ -54,15 +50,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 
-
-
-
-
-
-
-
+/* MAIN SERVER CLASS */
 public class Server{
-
+    /* CLASS VARS */
     private static Socket socket;
 	public static int Authentication;
 	public static int Integrity;
@@ -71,62 +61,28 @@ public class Server{
 	public static boolean Running = true;
 	private static String filename = "userpassword.txt";
 
-
-// unused
-private static void commands(){
-	        System.out.println("Server Side Running, requires information:\n");
-
-			System.out.print("Do you want Confidentiality? \nPlease type 'n' for no and 'y' for yes:");
-			Scanner sc = new Scanner(System.in);
-			Confidentiality = sc.nextInt();
-				if(Confidentiality!=0 && Confidentiality!= 1){
-					System.out.println("Invalid input");
-					System.exit(0);
-				}
-			System.out.print("Do you want Integrity? \nPlease type 'n' for no and 'y' for yes:");
-			Integrity = sc.nextInt();
-				if(Integrity!=0 && Integrity!= 1){
-						System.out.println("Invalid input");
-						System.exit(0);
-				}
-			System.out.print("Do you want Authentication? \nPlease type 'n' for no and 'y' for yes:");
-			Authentication = sc.nextInt();
-				if(Authentication!=0 && Authentication!= 1){
-						System.out.println("Invalid input");
-						System.exit(0);
-				}
-//			selected(Confidentiality,Integrity,Authentication);
-}
+    /**
+     *  This is the method that confirms what was requested
+     */
+    public static void selected() {
+    	System.out.println("\nYou have selected the following:");
+    	if(Command_total > 4) {
+    		System.out.println("\tConfidentiality");
+    	}
+    	if(Command_total == 7 || Command_total == 6 || Command_total == 3 || Command_total == 2) {
+    		System.out.println("\tIntegrity");
+    	}
+        if(Command_total%2 == 1) {
+    	//if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
+    		System.out.println("\tAuthentication");
+    	}
+    }
 
 
-
-/**
-* This is the method that confirms what was requested
-*/
-public static void selected(){
-	System.out.println("\nYou have Selected the Following:");
-	if (Command_total>4){
-		System.out.println("\tYou want Confidentiality");
-	}else{
-		System.out.println("\tYou do not want Confidentiality");
-	}
-	if (Command_total==2||Command_total==6||Command_total==7||Command_total==3){
-		System.out.println("\tYou want Integrity");
-	}else{
-		System.out.println("\tYou do not want Integrity");
-	}
-	if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
-		System.out.println("\tYou want Authentication");
-	}else{
-		System.out.println("\tYou do not want Authentication");
-	}
-}
-
-
-/**
-* This method works on finding if the user of the server wants what settings of security
-*/
-private static int getCIA() {
+    /**
+     * This method works on finding if the user of the server wants what settings of security
+     */
+    private static int getCIA() {
         char selection; // user input
         int triad = 0;  // security triad selection
         int val = 0;
@@ -140,11 +96,11 @@ private static int getCIA() {
                 System.out.println("Would you like Confidentiality? (y/n)");
                 val = 4;
             // Integrity
-            } else if (i == 1) {
+            } else if(i == 1) {
                 System.out.println("Would you like Integrity? (y/n)");
                 val = 2;
             // Authentication
-            } else if (i == 2) {
+            } else if(i == 2) {
                 System.out.println("Would you like Authentication? (y/n)");
                 val = 1;
             } else {
@@ -157,7 +113,7 @@ private static int getCIA() {
                 if(selection == 'y') {
                     triad += val;
                     check = false;
-                } else if (selection == 'n') {
+                } else if(selection == 'n') {
                     //do nothing
                     check = false;
                 } else {
@@ -166,39 +122,36 @@ private static int getCIA() {
             }
         }
         return triad;
-}
+    }
 
 
+    /**
+    * This function searchs the txt file for the user name and password
+    *
+    * Reference: https://stackoverflow.com/questions/5868369/how-to-read-a-large-text-file-line-by-line-using-java
+    */
+    public static boolean check_user(String name, String pword) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filename));
+    		String nl,pl;  //nl is name line, pl is password line
+    		while ((nl = br.readLine()) != null) {
+    			pl = br.readLine();
+    			if(nl.equals(name)) {
+    				if(pl.equals(pword)){
+    					return true;
+    				}
+    			}
+    		}
+    		return false;
+    	} catch(IOException ex) {
 
-/**
-* This function searchs the txt file for the user name and password
-*
-* Reference: https://stackoverflow.com/questions/5868369/how-to-read-a-large-text-file-line-by-line-using-java
-*/
-public static boolean check_user(String name, String pword){
-	try{
-		BufferedReader br = new BufferedReader(new FileReader(filename));
-		String nl,pl;  //nl is name line, pl is password line
-		while ((nl = br.readLine()) != null) {
-			pl = br.readLine();
-			if (nl.equals(name)) {
-				if(pl.equals(pword)){
-					return true;
-				}
-			}
-		}
-				
-		return false;
-	}catch(IOException ex){
-		
-	}
-	return false;
-}
+    	}
+    	return false;
+    }
 
-	
-public static void main(String[] args){
-        try{
 
+    public static void main(String[] args) {
+        try {
             int port = 7802;
             ServerSocket serverSocket = new ServerSocket(port);
 			Command_total = getCIA();
@@ -212,20 +165,16 @@ public static void main(String[] args){
 				String recived_1;
 				recived_1 = scan1.nextLine();
 				int recived = Integer.parseInt(recived_1);
-
-
-
 				String returnMessage;
+
 				if(recived==Command_total){
 					returnMessage = "Selected security properties were accepted";
 				}else{
 					returnMessage = "Selected security properties were denied";
 				}
 
-
 				p.println(returnMessage);
 				System.out.println("Sent message to client: "+returnMessage);
-
 
 				String user = "unknown";
 				String password = "unknown";
@@ -264,32 +213,14 @@ public static void main(String[] args){
 				}
 				Running =false;
 			}//while(Running)
-
-
-
-
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally{
-            try{
+        } finally {
+            try {
                 socket.close();
-            }catch(Exception e){}
-        }
- /*       int i = 0;
-        while(true) {
-            if(i == 0) {
-                System.out.print("Waiting\r");
-                i++;
-            } else if (i == 1) {
-                System.out.print("Waiting.\r");
-                i++;
-            } else if (i == 2) {
-                System.out.print("Waiting..\r");
-                i++;
-            } else {
-                System.out.print("Waiting...\r");
-                i = 0;
+            } catch(Exception e) {
+                //error
             }
-        } // end while*/
+        }
     } // end main
 } // end class Server
