@@ -45,6 +45,8 @@ import java.net.Socket;
 import javax.crypto.*;
 import java.security.Provider;
 import javax.crypto.Cipher;
+import java.io.PrintStream;
+
 
 
 
@@ -177,59 +179,6 @@ private static int getCIA() {
 public static void check_cia(int a){
 
 }
-/*
-public static void Authentication_check(){
-	boolean checking =true;
-		while(checking){
-				OutputStream os = socket.getOutputStream();
-                OutputStreamWriter osw = new OutputStreamWriter(os);
-                BufferedWriter bw = new BufferedWriter(osw);
-                bw.write("Please input Username:");
-                System.out.println("Message sent to the client is: Please input Username");
-                bw.flush();
-
-				socket = serverSocket.accept();
-                InputStream is = socket.getInputStream();
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
-                String number = br.readLine();
-
-
-
-				checking =false;
-
-						socket = serverSocket.accept();
-                InputStream is = socket.getInputStream();
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
-                String number = br.readLine();
-                System.out.println("Message received from client is "+number);
-
-                //Multiplying the number by 2 and forming the return message
-                String returnMessage;
-                try
-                {
-                //    int numberInIntFormat = Integer.parseInt(number);
-                  //  int returnValue = numberInIntFormat*2;
-                    returnMessage = (number) +"!"+ "\n";
-                }
-                catch(NumberFormatException e)
-                {
-                    //Input was not a number. Sending proper message back to client.
-                    returnMessage = "Please send a proper number\n";
-                }
-
-                //Sending the response back to the client.
-                OutputStream os = socket.getOutputStream();
-                OutputStreamWriter osw = new OutputStreamWriter(os);
-                BufferedWriter bw = new BufferedWriter(osw);
-                bw.write(returnMessage);
-                System.out.println("Message sent to the client is "+returnMessage);
-                bw.flush();
-
-		}
-}
-*/
 public static void main(String[] args){
         try{
 
@@ -240,6 +189,7 @@ public static void main(String[] args){
 			selected();
 			System.out.println("\nServer Started and listening to the port 7802\nReady for a client connection.");
 //			check_cia(Command_total); //will wait here until done
+<<<<<<< HEAD
 
 //			while(Running){
 			while(Running){
@@ -253,6 +203,22 @@ public static void main(String[] args){
 				int recived = Integer.parseInt(recived_1);
 
 
+=======
+
+			socket = serverSocket.accept();
+			Scanner scan1 = new Scanner(socket.getInputStream());
+			PrintStream p = new PrintStream(socket.getOutputStream());
+//			while(Running){
+			while(Running){
+					//Reading the message from the client
+
+				String recived_1;
+				recived_1 = scan1.nextLine();
+				int recived = Integer.parseInt(recived_1);
+
+
+
+>>>>>>> fe3ad2131448dce85844afb2cd4e93a89c05f01e
 				String returnMessage;
 				if(recived==Command_total){
 					returnMessage = "That was correct";
@@ -262,38 +228,52 @@ public static void main(String[] args){
 					returnMessage = "Selected security properties was not the same";
 				}
 
+
+				p.println(returnMessage);
+				System.out.println("Sent message to client: "+returnMessage);
+				recived_1 = scan1.nextLine();
+
+
+		/*
 				//Sending the response back to the client.
 				OutputStream os = socket.getOutputStream();
 				OutputStreamWriter osw = new OutputStreamWriter(os);
 				BufferedWriter bw = new BufferedWriter(osw);
 				bw.write(returnMessage);
-				System.out.println("Sent message to client: "+returnMessage);
 				bw.flush();
-                break;
 
-//				if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
+		*/
+				if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
 /*					boolean checking_authentication =true;
 					while(checking_authentication){
-*/			/*			socket = serverSocket.accept();
+*/
+						p.println("Please input Username:");
+						System.out.println("Message sent to the client is: Please input Username");
+
+
+/*						socket = serverSocket.accept();
 						OutputStream check_authen = socket.getOutputStream();
 						OutputStreamWriter check_authent = new OutputStreamWriter(check_authen);
 						BufferedWriter authen = new BufferedWriter(check_authent);
 						authen.write("Please input Username:");
 						System.out.println("Message sent to the client is: Please input Username");
-						authen.flush();
-
+*/
+						/*
 						socket = serverSocket.accept();
-/*						InputStreamReader isr =  InputStreamReader(is);
-						BufferedReader br =  BufferedReader(isr);
-						String recived_1 = br.readLine();
 
-					}
-*/					//	Authentication_check();
-//				}else{
+						InputStream is_user = socket.getInputStream();
+						InputStreamReader isr_user =  InputStreamReader(is_user);
+						BufferedReader br_user =  BufferedReader(isr_user);
+						recived_1 = br_user.readLine();
+*/
+				//	}
+					//	Authentication_check();
+				}else{
 
-//				}
-
+				}
+				Running =false;
 			}
+
 
 /*			Scanner exiter = new Scanner(System.in);
 			char exit_test;
