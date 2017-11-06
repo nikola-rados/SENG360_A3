@@ -46,6 +46,8 @@ import javax.crypto.*;
 import java.security.Provider;
 import javax.crypto.Cipher;
 import java.io.PrintStream;
+import java.util.NoSuchElementException;
+
 
 
 
@@ -210,11 +212,11 @@ public static void main(String[] args){
 
 				String returnMessage;
 				if(recived==Command_total){
-					returnMessage = "That was correct";
+					returnMessage = "Selected security properties were accepted";
 
 				//	Running =false;
 				}else{
-					returnMessage = "Selected security properties was not the same";
+					returnMessage = "Selected security properties were denied";
 				}
 
 
@@ -228,7 +230,11 @@ public static void main(String[] args){
 					while(checking_authentication){
 						p.println("Please input Username:");
 						System.out.println("Message sent to the client is: Please input Username");
+						try{
 						recived_1 = scan1.nextLine();
+						}catch(NoSuchElementException e){
+							System.out.println("should never get here");
+						}
 						
 						if (check_user(recived_1)){
 							checking_authentication=false;
@@ -236,42 +242,15 @@ public static void main(String[] args){
 							p.println("Username/Password is not vaild please try again");
 						}
 						
-/*						socket = serverSocket.accept();
-						OutputStream check_authen = socket.getOutputStream();
-						OutputStreamWriter check_authent = new OutputStreamWriter(check_authen);
-						BufferedWriter authen = new BufferedWriter(check_authent);
-						authen.write("Please input Username:");
-						System.out.println("Message sent to the client is: Please input Username");
-*/
-						/*
-						socket = serverSocket.accept();
-
-						InputStream is_user = socket.getInputStream();
-						InputStreamReader isr_user =  InputStreamReader(is_user);
-						BufferedReader br_user =  BufferedReader(isr_user);
-						recived_1 = br_user.readLine();
-<<<<<<< HEAD
-*/					
-					}
-					//	Authentication_check();
+				
+					}//while checking authentication
 				}else{
 
 				}
 				Running =false;
-			}
+			}//running while
 
 
-/*			Scanner exiter = new Scanner(System.in);
-			char exit_test;
-			System.out.println("Do you want to exit? (y/n)");
-			exit_test = exiter.next().charAt(0);
-                if(exit_test == 'y') {
-					Running =false;
-				}else{
-
-				}
-*/
-//			}
 
 
         }catch (Exception e){
