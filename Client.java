@@ -26,6 +26,8 @@ public class Client {
         PrintStream cia_check = new PrintStream(socket.getOutputStream());
         cia_check.println(CIA);
 
+        //there is a change to be made here
+
         // instant message
         System.out.println("Enter a message:\n");
         msg = scan.nextLine();
