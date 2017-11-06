@@ -20,6 +20,7 @@ public class Client {
         // send server message containing triad number to check security protocols
         PrintStream cia_check = new PrintStream(socket.getOutputStream());
         cia_check.println(cia);
+        System.out.println("--------------------------------------------------------");
 
         // listen for a response from the server
         while(true) {
@@ -28,7 +29,7 @@ public class Client {
                 System.out.println("Server: " + server_str);
             }
             catch(NoSuchElementException e) {
-                System.out.println("--- No message ---");
+                System.out.println("--- No message sent ---");
                 System.out.println("Exiting Program...");
                 break;
             }
