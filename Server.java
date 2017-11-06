@@ -171,6 +171,7 @@ private static int getCIA() {
 
 
 /**
+* This function searchs the txt file for the user name and password
 *
 * Reference: https://stackoverflow.com/questions/5868369/how-to-read-a-large-text-file-line-by-line-using-java
 */
@@ -257,12 +258,12 @@ public static void main(String[] args){
 						}
 
 
-					}//while checking authentication
+					}//while(checking authentication)
 				}else{
-
+					System.out.println("Since Authentication was not choosen the defualt username and password are UNKNOWN");
 				}
 				Running =false;
-			}//running while
+			}//while(Running)
 
 
 
