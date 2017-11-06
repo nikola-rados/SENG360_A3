@@ -177,7 +177,7 @@ private static int getCIA() {
 
 
 public static boolean check_user(String name){
-	if(name=="Nik"){	
+	if(name=="Nik"){
 		return false;
 	}else{
 		return true;
@@ -221,21 +221,21 @@ public static void main(String[] args){
 				p.println(returnMessage);
 				System.out.println("Sent message to client: "+returnMessage);
 			//	recived_1 = scan1.nextLine();
-
-
+                break;
+/*
 				if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
 					boolean checking_authentication =true;
 					while(checking_authentication){
 						p.println("Please input Username:");
 						System.out.println("Message sent to the client is: Please input Username");
 						recived_1 = scan1.nextLine();
-						
+
 						if (check_user(recived_1)){
 							checking_authentication=false;
 						}else{
 							p.println("Username/Password is not vaild please try again");
 						}
-						
+
 /*						socket = serverSocket.accept();
 						OutputStream check_authen = socket.getOutputStream();
 						OutputStreamWriter check_authent = new OutputStreamWriter(check_authen);
@@ -251,14 +251,14 @@ public static void main(String[] args){
 						BufferedReader br_user =  BufferedReader(isr_user);
 						recived_1 = br_user.readLine();
 <<<<<<< HEAD
-*/					
+*/
 					}
 					//	Authentication_check();
-				}else{
+//				}else{
 
-				}
-				Running =false;
-			}
+//				}
+//				Running =false;
+//			}
 
 
 /*			Scanner exiter = new Scanner(System.in);
