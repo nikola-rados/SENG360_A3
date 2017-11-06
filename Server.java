@@ -170,7 +170,7 @@ private static int getCIA() {
 
 
 public static boolean check_user(String name, String pword){
-	if(name=="Nik"){	
+	if(name=="Nik"){
 		return false;
 	}else{
 		return true;
@@ -219,7 +219,7 @@ public static void main(String[] args){
 				p.println(returnMessage);
 				System.out.println("Sent message to client: "+returnMessage);
 
-				
+
 				String user = "unknown";
 				String password = "unknown";
 				if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
@@ -227,13 +227,13 @@ public static void main(String[] args){
 					while(checking_authentication){
 						p.println("Please input Username:");
 						System.out.println("Message sent to the client is: Please input Username");
-					
+
 						try{
 							user = scan1.nextLine();
 						}catch(NoSuchElementException e){
 							System.out.println("should never get here");
 						}
-						
+
 						p.println("Please input Password:");
 						System.out.println("Message sent to the client is: Please input Password");
 						try{
@@ -241,7 +241,7 @@ public static void main(String[] args){
 						}catch(NoSuchElementException e){
 							System.out.println("should never get here");
 						}
-						
+
 						if (check_user(user,password)){
 							filename = "user/password.txt";
 							checkFile(filename);
@@ -249,8 +249,8 @@ public static void main(String[] args){
 						}else{
 							p.println("Username/Password is not vaild please try again");
 						}
-						
-				
+
+
 					}//while checking authentication
 				}else{
 

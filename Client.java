@@ -20,22 +20,41 @@ public class Client {
         // send server message containing triad number to check security protocols
         PrintStream cia_check = new PrintStream(socket.getOutputStream());
         cia_check.println(cia);
+        System.out.println("--------------------------------------------------------");
 
         // listen for a response from the server
-        try {
-            server_str = scan_server.nextLine();
-            System.out.println("Server: " + server_str);
-        }
-        catch(NoSuchElementException e) {
-            System.out.println("--- No message ---");
-        }
+        while(true) {
+            try {
+                server_str = scan_server.nextLine();
+                System.out.println("Server: " + server_str);
+            }
+            catch(NoSuchElementException e) {
+                System.out.println("--- No message sent ---");
+                System.out.println("Exiting Program...");
+                break;
+            }
 
-        //test || once we finish listening for a message prompt the user and send the server a message back.
-        System.out.print("Client: ");
-        msg = scan_client.nextLine();
-        System.out.println(msg);
-        PrintStream client_out = new PrintStream(socket.getOutputStream());
-        client_out.println(msg);
+            // first iteration needs to check for the confirmation message
+            if(server_str.contains("accepted")) {
+                continue;
+            } else if (server_str.contains("denied")){
+                System.out.println("Exiting Program...");
+                break;
+            }
+
+            // After Server responds, user can respond
+            System.out.print("Client: ");
+            msg = scan_client.nextLine();
+
+            // check if client wishes to break from the conversation
+            if (msg.contains("!quit")) {
+                break;
+            }
+
+            // send messag to Server
+            PrintStream client_out = new PrintStream(socket.getOutputStream());
+            client_out.println(msg);
+        }
     }
 
     // prompts user for with security options
