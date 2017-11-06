@@ -17,6 +17,17 @@ Things to keep in mind:
 	Authentication also requires that users authenticate. This can be done using a password authentication on client and server, respectively.
 	
 	
+TO do:
+
+	when values are equal:
+	1 - 001
+	2 - 010
+	3 - 011
+	4 - 100
+	5 - 101
+	6 - 110
+	7 - 111
+	0 - 000
 	
 	
 */
@@ -188,6 +199,7 @@ public static void main(String[] args){
 				String returnMessage;
 				if(recived==Command_total){
 					returnMessage = "That was correct";
+					break;
 				}else{
 					returnMessage = "Selected security properties was not the same";
 				}
@@ -197,7 +209,7 @@ public static void main(String[] args){
                 OutputStreamWriter osw = new OutputStreamWriter(os);
                 BufferedWriter bw = new BufferedWriter(osw);
                 bw.write(returnMessage);
-                System.out.println("Message sent to the client is "+returnMessage);
+                System.out.println("Sent message to client: "+returnMessage);
                 bw.flush();
 			}
 	
