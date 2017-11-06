@@ -47,7 +47,10 @@ import java.security.Provider;
 import javax.crypto.Cipher;
 import java.io.PrintStream;
 import java.util.NoSuchElementException;
-
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 
 
 
@@ -64,21 +67,6 @@ public class Server{
 	public static int Confidentiality;
 	public static int Command_total;
 	public static boolean Running = true;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // unused
@@ -178,32 +166,29 @@ private static int getCIA() {
 }
 
 
-public static boolean check_user(String name){
+public static boolean check_user(String name, String pword){
 	if(name=="Nik"){
 		return false;
 	}else{
 		return true;
 	}
 }
+
+
+
 public static void main(String[] args){
         try{
 
             int port = 7802;
-
             ServerSocket serverSocket = new ServerSocket(port);
 			Command_total = getCIA();
 			selected();
 			System.out.println("\nServer Started and listening to the port 7802\nReady for a client connection.");
-//			check_cia(Command_total); //will wait here until done
-
-
 			socket = serverSocket.accept();
 			Scanner scan1 = new Scanner(socket.getInputStream());
 			PrintStream p = new PrintStream(socket.getOutputStream());
-//			while(Running){
-			while(Running){
-					//Reading the message from the client
 
+			while(Running){
 				String recived_1;
 				recived_1 = scan1.nextLine();
 				int recived = Integer.parseInt(recived_1);
@@ -213,8 +198,6 @@ public static void main(String[] args){
 				String returnMessage;
 				if(recived==Command_total){
 					returnMessage = "Selected security properties were accepted";
-
-				//	Running =false;
 				}else{
 					returnMessage = "Selected security properties were denied";
 				}
@@ -222,20 +205,30 @@ public static void main(String[] args){
 
 				p.println(returnMessage);
 				System.out.println("Sent message to client: "+returnMessage);
-			//	recived_1 = scan1.nextLine();
 
+
+				String user = "unknown";
+				String password = "unknown";
 				if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
 					boolean checking_authentication =true;
 					while(checking_authentication){
 						p.println("Please input Username:");
 						System.out.println("Message sent to the client is: Please input Username");
+
 						try{
-						recived_1 = scan1.nextLine();
+							user = scan1.nextLine();
 						}catch(NoSuchElementException e){
 							System.out.println("should never get here");
 						}
 
-						if (check_user(recived_1)){
+						System.out.println("Message sent to the client is: Please input Password");
+						try{
+						password = scan1.nextLine();
+						}catch(NoSuchElementException e){
+							System.out.println("should never get here");
+						}
+
+						if (check_user(user,password)){
 							checking_authentication=false;
 						}else{
 							p.println("Username/Password is not vaild please try again");
