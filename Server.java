@@ -51,6 +51,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+
 
 
 
@@ -67,6 +69,7 @@ public class Server{
 	public static int Confidentiality;
 	public static int Command_total;
 	public static boolean Running = true;
+	private static String filename = "user/password.txt";
 
 
 // unused
@@ -174,7 +177,17 @@ public static boolean check_user(String name, String pword){
 	}
 }
 
-
+public static void checkFile(String filename) {
+	File f = new File(filename);
+		if (!f.exists()) {
+            try {
+                System.out.println("Creating file");
+                f.createNewFile();
+            } catch (IOException ex) {
+				System.out.println("Should ");
+			}
+        }
+}
 	
 public static void main(String[] args){
         try{
@@ -224,12 +237,14 @@ public static void main(String[] args){
 						p.println("Please input Password:");
 						System.out.println("Message sent to the client is: Please input Password");
 						try{
-						password = scan1.nextLine();
+							password = scan1.nextLine();
 						}catch(NoSuchElementException e){
 							System.out.println("should never get here");
 						}
 						
 						if (check_user(user,password)){
+							filename = "user/password.txt";
+							checkFile(filename);
 							checking_authentication=false;
 						}else{
 							p.println("Username/Password is not vaild please try again");
