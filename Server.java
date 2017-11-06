@@ -220,7 +220,8 @@ public static void main(String[] args){
 						}catch(NoSuchElementException e){
 							System.out.println("should never get here");
 						}
-					
+						
+						p.println("Please input Password:");
 						System.out.println("Message sent to the client is: Please input Password");
 						try{
 						password = scan1.nextLine();
