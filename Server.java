@@ -48,6 +48,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -62,7 +63,7 @@ public class Server{
 	public static int Confidentiality;
 	public static int Command_total;
 	public static boolean Running = true;
-	private static String filename = "userpassword.txt";
+	private static String filename = "secure.txt";
     private static final String DEFAULT_USER = "seng360";
     private static final String DEFAULT_PASS = "assignment3";
 
@@ -136,22 +137,25 @@ public class Server{
     * Reference: https://stackoverflow.com/questions/5868369/how-to-read-a-large-text-file-line-by-line-using-java
     */
     public static boolean check_user(String name, String pword) {
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(filename));
-    		String nl,pl;  //nl is name line, pl is password line
-    		while ((nl = br.readLine()) != null) {
-    			pl = br.readLine();
-    			if(nl.equals(name)) {
-    				if(pl.equals(pword)){
-    					return true;
-    				}
-    			}
-    		}
-    		return false;
-    	} catch(IOException ex) {
+        // first lets hash the strings
+        String name_hashed = hashText(name);
+        String pword_hashed = hashText(pword);
 
+        try {
+            FileInputStream fs = new FileInputStream(filename);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fs));
+    		String str_check;
+    		while ((str_check = br.readLine()) != null) {
+                if(str_check.contains(name_hashed) && str_check.contains(pword_hashed)) {
+                    br.close();
+                    return true;
+                }
+    		}
+            br.close();
+    	} catch (IOException ex) {
+            System.out.println("Error: Unable to read file");
     	}
-    	return false;
+        return false;
     }
 
 
@@ -190,10 +194,37 @@ public class Server{
         writeToFile(sbUser.toString(), sbPass.toString());
     }
 
+
+    /*
+     *  Similar to the generateUserPass function, this will just hash a String
+     *  and return it.
+     */
+     private static String hashText(String unhashed) {
+         MessageDigest md;
+         StringBuffer sb = new StringBuffer();
+         String hashed;
+
+         // Create instance
+         try {
+             md = MessageDigest.getInstance("SHA-256");
+             md.update(unhashed.getBytes());
+             byte byteData[] = md.digest();
+
+             // convert to hex
+             for(int i = 0; i < byteData.length; i++) {
+                 sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
+             }
+         } catch (NoSuchAlgorithmException e) {
+             System.out.println("Fatal Error: Algorithm not available");
+             System.exit(0);
+         }
+         return hashed = sb.toString();
+     }
+
     //private helper method
     private static void writeToFile(String username, String password) {
         // first we need to create the file
-        File f = new File("secure.txt");
+        File f = new File(filename);
         try {
             boolean f_check = f.createNewFile();
             if(f_check) {
@@ -248,36 +279,35 @@ public class Server{
 				String user = "unknown";
 				String password = "unknown";
                 // Authentication
-				if (Command_total%2 == 1){
+				if(Command_total%2 == 1){
                     generateUserPass(DEFAULT_USER, DEFAULT_PASS);
 					boolean checking_authentication = true;
-					while(checking_authentication){
+					while(checking_authentication) {
 						p.println("Please input Username:");
 						System.out.println("Message sent to the client is: Please input Username");
 
-						try{
+						try {
 							user = scan1.nextLine();
-						}catch(NoSuchElementException e){
+						} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 						}
 
 						p.println("Please input Password:");
 						System.out.println("Message sent to the client is: Please input Password");
-						try{
+						try {
 							password = scan1.nextLine();
-						}catch(NoSuchElementException e){
+						} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 						}
 
-						if (check_user(user,password)){
-							filename = "userpassword.txt";
-							System.out.println("Message sent to the client is: User and Password accepted");
+						if(check_user(user,password)) {
+							p.println("Message sent to the client is: User and Password accepted.  Instant Message initiated...");
 							checking_authentication=false;
-						}else{
+						} else {
 							p.println("Username/Password is not vaild please try again");
 						}
 					}//while(checking authentication)
-				}else{
+				} else {
 					System.out.println("Since Authentication was not choosen the defualt username and password are UNKNOWN");
 				}
 				Running =false;
