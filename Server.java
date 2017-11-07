@@ -56,7 +56,6 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
-//import sun.misc.*;
 
 
 /* MAIN SERVER CLASS */
@@ -255,11 +254,11 @@ public class Server{
 
     }
 //-----------------
-	
+
 	private static final String ALGO = "AES";
     private static final byte[] keyValue
             = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't',
-                'S', '-', '!', '2', '%', 't', 'K', 'e', ';'};
+                'S', '-', '!', '2', '%', 't', 'K', 'e'};
 
     public static String encrypt(String Data) throws Exception {
         Key key = generateKey();
@@ -279,16 +278,16 @@ public class Server{
         String decryptedValue = new String(decValue);
         return decryptedValue;
     }
-    
+
     private static Key generateKey() throws Exception {
         Key key = new SecretKeySpec(keyValue, ALGO);
         return key;
     }
-	
-	
-	
-	
-	
+
+
+
+
+
 	//-------------------
     public static void main(String[] args) {
         try {
@@ -369,17 +368,17 @@ public class Server{
 								break;
 							}
 							sender = encrypt(sender);
-							
+
 					}catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 					}
-					
+
 					p.println(sender);
 					//System.out.println("Server: "+ sender);
-					
+
 				}
-				
-				
+
+
 				Running =false;
 			}//while(Running)
         } catch (Exception e) {

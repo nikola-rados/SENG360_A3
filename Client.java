@@ -4,15 +4,18 @@ import java.io.PrintStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
+import javax.crypto.*;
 
 
 public class Client {
 
 
     private static final String ALGO = "AES";
-    private static final byte[] keyValue
-            = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't',
-                'S', '-', '!', '2', '%', 't', 'K', 'e'};
+    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e'};
 
 
     public static String encrypt(String Data) throws Exception {
@@ -58,8 +61,13 @@ public class Client {
         while(true) {
             try {
                 server_str = scan_server.nextLine();
-                if (Confidentiality) {
-                    server_str
+                // Confidentiality check
+                if(cia >= 4) {
+                    try {
+                        server_str = decrypt(server_str);
+                    } catch (Exception e) {
+                        System.out.println("Error: Unable to decrypt message");
+                    }
                 }
                 System.out.println("Server: " + server_str);
             }
@@ -83,13 +91,19 @@ public class Client {
             // After Server responds, user can respond
             System.out.print("Client: ");
             msg = scan_client.nextLine();
-            if (Confidentiality) {
-                msg = encryptMessage(msg);
-            }
 
             // check if client wishes to break from the conversation
             if (msg.contains("!quit")) {
                 break;
+            }
+            
+            // Confidentiality check
+            if(cia >= 4) {
+                try {
+                    server_str = encrypt(server_str);
+                } catch (Exception e) {
+                    System.out.println("Error: Unable to encrypt message");
+                }
             }
 
             // send messag to Server
