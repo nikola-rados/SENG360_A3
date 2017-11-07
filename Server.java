@@ -257,10 +257,8 @@ public class Server{
     }
 
 	private static final String ALGO = "AES";
-    private static final byte[] keyValue
-            = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't',
+    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e', '9'};
 
-                'S', '-', '!', '2', '%', 't', 'K', 'e'};
 
     public static String encrypt(String Data) throws Exception {
         Key key = generateKey();
@@ -297,12 +295,12 @@ public class Server{
 			PrintStream p = new PrintStream(socket.getOutputStream());
 			Scanner message = new Scanner(System.in);
 
-
 			while(Running){
 				String recived_1;
 				recived_1 = scan1.nextLine();
 				int recived = Integer.parseInt(recived_1);
 				String returnMessage;
+				
 
 				if(recived==Command_total){
 					returnMessage = "Selected security properties were accepted";
@@ -310,10 +308,16 @@ public class Server{
 					returnMessage = "Selected security properties were denied";
 				}
 				if(Confidentiality){
-					encrypt(returnMessage);
+					returnMessage = encrypt(returnMessage);
 				}
+
+
 				p.println(returnMessage);
-				System.out.println("Sent message to client: "+returnMessage);
+				if(Confidentiality){
+					System.out.println("Sent message to client: "+decrypt(returnMessage));
+				}else{
+					System.out.println("Sent message to client: "+(returnMessage));
+				}
 
 				String user = "unknown";
 				String password = "unknown";
@@ -353,10 +357,21 @@ public class Server{
 						}
 												
 						if(check_user(user,password)) {
-							p.println("Message sent to the client is: Username and Password accepted.  Instant Message initiated...");
+							if(Confidentiality){
+								p.println(encrypt("Message sent to the client is: Username and Password accepted.  Instant Message initiated..."));
+							}else{
+								p.println("Message sent to the client is: Username and Password accepted.  Instant Message initiated...");
+
+							}	
 							checking_authentication=false;
 						} else {
-							p.println("Username/Password is not vaild please try again");
+							if(Confidentiality){
+								p.println(encrypt("Username/Password is not vaild please try again"));
+							}else{
+								
+								p.println("Username/Password is not vaild please try again");
+						
+							}
 						}
 					}//while(checking authentication)
 				} else {

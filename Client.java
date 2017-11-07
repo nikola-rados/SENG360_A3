@@ -15,7 +15,7 @@ public class Client {
 
 
     private static final String ALGO = "AES";
-    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e'};
+    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e', '9'};
 
 
     public static String encrypt(String Data) throws Exception {
@@ -50,7 +50,7 @@ public class Client {
         Scanner scan_server = new Scanner(socket.getInputStream());
 
         int cia = getCIA();
-        //System.out.println(cia);
+        System.out.println(cia);
 
         // send server message containing triad number to check security protocols
         PrintStream cia_check = new PrintStream(socket.getOutputStream());
@@ -100,7 +100,7 @@ public class Client {
             // Confidentiality check
             if(cia >= 4) {
                 try {
-                    server_str = encrypt(server_str);
+                    msg = encrypt(msg);
                 } catch (Exception e) {
                     System.out.println("Error: Unable to encrypt message");
                 }
