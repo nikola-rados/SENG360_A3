@@ -4,23 +4,20 @@ import java.io.PrintStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
-import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
+import javax.crypto.*;
+
 
 public class Client {
 
 
     private static final String ALGO = "AES";
-    private static final byte[] keyValue
-            = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't',
-                'S', '-', '!', '2', '%', 't', 'K', 'e', 'e'};
+    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e'};
 
- 
+
     public static String encrypt(String Data) throws Exception {
         Key key = generateKey();
         Cipher c = Cipher.getInstance(ALGO);
@@ -39,8 +36,8 @@ public class Client {
         String decryptedValue = new String(decValue);
         return decryptedValue;
     }
-    
-    
+
+
     private static Key generateKey() throws Exception {
         Key key = new SecretKeySpec(keyValue, ALGO);
         return key;
@@ -64,11 +61,14 @@ public class Client {
         while(true) {
             try {
                 server_str = scan_server.nextLine();
-				try {
-					server_str = decrypt(server_str);
-				} catch(Exception e) {
-				
-				}
+                // Confidentiality check
+                if(cia >= 4) {
+                    try {
+                        server_str = decrypt(server_str);
+                    } catch (Exception e) {
+                        System.out.println("Error: Unable to decrypt message");
+                    }
+                }
                 System.out.println("Server: " + server_str);
             }
             catch(NoSuchElementException e) {
@@ -96,6 +96,15 @@ public class Client {
             if (msg.contains("!quit")) {
                 break;
             }
+            
+            // Confidentiality check
+            if(cia >= 4) {
+                try {
+                    server_str = encrypt(server_str);
+                } catch (Exception e) {
+                    System.out.println("Error: Unable to encrypt message");
+                }
+            }
 
             // send messag to Server
             PrintStream client_out = new PrintStream(socket.getOutputStream());
@@ -103,9 +112,6 @@ public class Client {
         }
     }
 
-	
-	
-	
     // prompts user for with security options
     private static int getCIA() {
         char selection; // user input
