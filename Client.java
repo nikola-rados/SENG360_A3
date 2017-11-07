@@ -18,7 +18,7 @@ public class Client {
     private static final String ALGO = "AES";
     private static final byte[] keyValue
             = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't',
-                'S', '-', '!', '2', '%', 't', 'K', 'e', ';'};
+                'S', '-', '!', '2', '%', 't', 'K', 'e', 'e'};
 
  
     public static String encrypt(String Data) throws Exception {
