@@ -96,11 +96,11 @@ public class Client {
             if (msg.contains("!quit")) {
                 break;
             }
-            
+
             // Confidentiality check
             if(cia >= 4) {
                 try {
-                    server_str = encrypt(server_str);
+                    msg = encrypt(msg);
                 } catch (Exception e) {
                     System.out.println("Error: Unable to encrypt message");
                 }
