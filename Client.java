@@ -50,7 +50,7 @@ public class Client {
         Scanner scan_server = new Scanner(socket.getInputStream());
 
         int cia = getCIA();
-        System.out.println(cia);
+        //System.out.println(cia);
 
         // send server message containing triad number to check security protocols
         PrintStream cia_check = new PrintStream(socket.getOutputStream());
