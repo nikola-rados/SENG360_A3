@@ -52,6 +52,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
+//import sun.misc.*;
 
 
 /* MAIN SERVER CLASS */
@@ -249,7 +254,42 @@ public class Server{
         }
 
     }
+//-----------------
+	
+	private static final String ALGO = "AES";
+    private static final byte[] keyValue
+            = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't',
+                'S', '-', '!', '2', '%', 't', 'K', 'e', ';'};
 
+    public static String encrypt(String Data) throws Exception {
+        Key key = generateKey();
+        Cipher c = Cipher.getInstance(ALGO);
+        c.init(Cipher.ENCRYPT_MODE, key);
+        byte[] encVal = c.doFinal(Data.getBytes());
+        String encryptedValue = Base64.getEncoder().encodeToString(encVal);
+        return encryptedValue;
+    }
+
+    public static String decrypt(String encryptedData) throws Exception {
+        Key key = generateKey();
+        Cipher c = Cipher.getInstance(ALGO);
+        c.init(Cipher.DECRYPT_MODE, key);
+        byte[] decordedValue = Base64.getDecoder().decode(encryptedData);
+        byte[] decValue = c.doFinal(decordedValue);
+        String decryptedValue = new String(decValue);
+        return decryptedValue;
+    }
+    
+    private static Key generateKey() throws Exception {
+        Key key = new SecretKeySpec(keyValue, ALGO);
+        return key;
+    }
+	
+	
+	
+	
+	
+	//-------------------
     public static void main(String[] args) {
         try {
             int port = 7802;
@@ -325,12 +365,15 @@ public class Server{
 					try {
 							System.out.print("Server: ");
 							sender = message.nextLine();
+							if (sender.contains("!quit")) {
+								break;
+							}
+							sender = encrypt(sender);
+							
 					}catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 					}
-					if (sender.contains("!quit")) {
-						break;
-					}
+					
 					p.println(sender);
 					//System.out.println("Server: "+ sender);
 					
