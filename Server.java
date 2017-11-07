@@ -64,7 +64,7 @@ public class Server{
     private static Socket socket;
 	public static int Authentication;
 	public static int Integrity;
-	public static int Confidentiality;
+	public static boolean Confidentiality;
 	public static int Command_total;
 	public static boolean Running = true;
 	private static String filename = "secure.txt";
@@ -76,9 +76,12 @@ public class Server{
      */
     public static void selected() {
     	System.out.println("\nYou have selected the following:");
-    	if(Command_total > 4) {
+    	if(Command_total > 3) {
     		System.out.println("\tConfidentiality");
-    	}
+			Confidentiality=true;
+    	}else{
+			Confidentiality=false;
+		}
     	if(Command_total == 7 || Command_total == 6 || Command_total == 3 || Command_total == 2) {
     		System.out.println("\tIntegrity");
     	}
@@ -101,7 +104,6 @@ public class Server{
 
         for(int i = 0; i < 3; i++) {
             check = true;
-            // Confidentiality
             if(i == 0) {
                 System.out.println("Would you like Confidentiality? (y/n)");
                 val = 4;
@@ -253,12 +255,10 @@ public class Server{
         }
 
     }
-//-----------------
 
 	private static final String ALGO = "AES";
-    private static final byte[] keyValue
-            = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't',
-                'S', '-', '!', '2', '%', 't', 'K', 'e'};
+    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e', '9'};
+
 
     public static String encrypt(String Data) throws Exception {
         Key key = generateKey();
@@ -283,12 +283,6 @@ public class Server{
         Key key = new SecretKeySpec(keyValue, ALGO);
         return key;
     }
-
-
-
-
-
-	//-------------------
     public static void main(String[] args) {
         try {
             int port = 7802;
@@ -301,21 +295,29 @@ public class Server{
 			PrintStream p = new PrintStream(socket.getOutputStream());
 			Scanner message = new Scanner(System.in);
 
-
 			while(Running){
 				String recived_1;
 				recived_1 = scan1.nextLine();
 				int recived = Integer.parseInt(recived_1);
 				String returnMessage;
+				
 
 				if(recived==Command_total){
 					returnMessage = "Selected security properties were accepted";
 				}else{
 					returnMessage = "Selected security properties were denied";
 				}
+				if(Confidentiality){
+					returnMessage = encrypt(returnMessage);
+				}
+
 
 				p.println(returnMessage);
-				System.out.println("Sent message to client: "+returnMessage);
+				if(Confidentiality){
+					System.out.println("Sent message to client: "+decrypt(returnMessage));
+				}else{
+					System.out.println("Sent message to client: "+(returnMessage));
+				}
 
 				String user = "unknown";
 				String password = "unknown";
@@ -324,7 +326,11 @@ public class Server{
                     generateUserPass(DEFAULT_USER, DEFAULT_PASS);
 					boolean checking_authentication = true;
 					while(checking_authentication) {
-						p.println("Please input Username:");
+						if(Confidentiality){
+								p.println(encrypt("Please input Username:"));
+						}else{
+								p.println("Please input Username:");
+						}
 						System.out.println("Message sent to the client is: Please input Username");
 
 						try {
@@ -332,20 +338,40 @@ public class Server{
 						} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 						}
-
-						p.println("Please input Password:");
+						
+						if(Confidentiality){
+								p.println(encrypt("Please input Password:"));
+						}else{
+								p.println("Please input Password:");
+						}
+		
 						System.out.println("Message sent to the client is: Please input Password");
 						try {
 							password = scan1.nextLine();
 						} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 						}
-
+						if(Confidentiality){
+								user = decrypt(user);
+								password = decrypt(password);
+						}
+												
 						if(check_user(user,password)) {
-							p.println("Message sent to the client is: Username and Password accepted.  Instant Message initiated...");
+							if(Confidentiality){
+								p.println(encrypt("Message sent to the client is: Username and Password accepted.  Instant Message initiated..."));
+							}else{
+								p.println("Message sent to the client is: Username and Password accepted.  Instant Message initiated...");
+
+							}	
 							checking_authentication=false;
 						} else {
-							p.println("Username/Password is not vaild please try again");
+							if(Confidentiality){
+								p.println(encrypt("Username/Password is not vaild please try again"));
+							}else{
+								
+								p.println("Username/Password is not vaild please try again");
+						
+							}
 						}
 					}//while(checking authentication)
 				} else {
@@ -355,11 +381,17 @@ public class Server{
 				String reciver="";
 				String sender="";
 				while(communication){
+					
+					
+					
 					try {
 						reciver = scan1.nextLine();
 					} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 					}
+					if(Confidentiality){
+								reciver = decrypt(reciver);
+					}					
 					System.out.println("Client: "+ reciver);
 					try {
 							System.out.print("Server: ");
@@ -367,8 +399,9 @@ public class Server{
 							if (sender.contains("!quit")) {
 								break;
 							}
+						if(Confidentiality){
 							sender = encrypt(sender);
-
+						}	
 					}catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 					}
