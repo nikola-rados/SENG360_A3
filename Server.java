@@ -159,7 +159,7 @@ public class Server{
     }
 
 
-    /*
+    /**
      *  Generate the default setting for password which will be:
      *  Username: seng360
      *  Password: assignment3
@@ -260,6 +260,8 @@ public class Server{
 			socket = serverSocket.accept();
 			Scanner scan1 = new Scanner(socket.getInputStream());
 			PrintStream p = new PrintStream(socket.getOutputStream());
+			Scanner message = new Scanner(System.in);
+
 
 			while(Running){
 				String recived_1;
@@ -301,7 +303,7 @@ public class Server{
 						}
 
 						if(check_user(user,password)) {
-							p.println("Message sent to the client is: User and Password accepted.  Instant Message initiated...");
+							p.println("Message sent to the client is: Username and Password accepted.  Instant Message initiated...");
 							checking_authentication=false;
 						} else {
 							p.println("Username/Password is not vaild please try again");
@@ -310,6 +312,31 @@ public class Server{
 				} else {
 					System.out.println("Since Authentication was not choosen the defualt username and password are UNKNOWN");
 				}
+				boolean communication = true;
+				String reciver="";
+				String sender="";
+				while(communication){
+					try {
+						reciver = scan1.nextLine();
+					} catch(NoSuchElementException e) {
+							System.out.println("should never get here");
+					}
+					System.out.println("Client: "+ reciver);
+					try {
+							System.out.print("Server: ");
+							sender = message.nextLine();
+					}catch(NoSuchElementException e) {
+							System.out.println("should never get here");
+					}
+					if (sender.contains("!quit")) {
+						break;
+					}
+					p.println(sender);
+					//System.out.println("Server: "+ sender);
+					
+				}
+				
+				
 				Running =false;
 			}//while(Running)
         } catch (Exception e) {
