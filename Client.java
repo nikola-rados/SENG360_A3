@@ -15,8 +15,6 @@ import java.util.Base64;
 public class Client {
 
 
-//----------------
-
     private static final String ALGO = "AES";
     private static final byte[] keyValue
             = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't',
@@ -47,7 +45,7 @@ public class Client {
         Key key = new SecretKeySpec(keyValue, ALGO);
         return key;
     }
-//--------
+
     public static void main(String[] args) throws UnknownHostException, IOException {
         String msg, server_str;
         Scanner scan_client = new Scanner(System.in);
