@@ -42,11 +42,17 @@ import javax.crypto.*;
 import java.security.Provider;
 import javax.crypto.Cipher;
 import java.io.PrintStream;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.NoSuchElementException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -56,6 +62,7 @@ import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
+import java.io.*;
 
 
 /* MAIN SERVER CLASS */
@@ -63,7 +70,7 @@ public class Server{
     /* CLASS VARS */
     private static Socket socket;
 	public static int Authentication;
-	public static int Integrity;
+	public static boolean Integrity;
 	public static boolean Confidentiality;
 	public static int Command_total;
 	public static boolean Running = true;
@@ -84,7 +91,10 @@ public class Server{
 		}
     	if(Command_total == 7 || Command_total == 6 || Command_total == 3 || Command_total == 2) {
     		System.out.println("\tIntegrity");
-    	}
+			Integrity = true;
+    	}else{
+			Integrity = false;
+		}
         if(Command_total%2 == 1) {
     	//if (Command_total==7||Command_total==5||Command_total==3||Command_total==1){
     		System.out.println("\tAuthentication");
@@ -290,12 +300,16 @@ public class Server{
 			Command_total = getCIA();
 			selected();
 			System.out.println("\nServer Started and listening to the port 7802\nReady for a client connection.");
-			socket = serverSocket.accept();
-			Scanner scan1 = new Scanner(socket.getInputStream());
-			PrintStream p = new PrintStream(socket.getOutputStream());
-			Scanner message = new Scanner(System.in);
+				
+
+			
+			
 
 			while(Running){
+				socket = serverSocket.accept();
+				Scanner scan1 = new Scanner(socket.getInputStream());
+				PrintStream p = new PrintStream(socket.getOutputStream());
+				Scanner message = new Scanner(System.in);
 				String recived_1;
 				recived_1 = scan1.nextLine();
 				int recived = Integer.parseInt(recived_1);
@@ -318,6 +332,35 @@ public class Server{
 				}else{
 					System.out.println("Sent message to client: "+(returnMessage));
 				}
+				
+				
+				if(Integrity){
+				
+					// Generate a 1024-bit Digital Signature Algorithm (DSA) key pair
+					KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+					keyGen.initialize(1024);
+					KeyPair keypair = keyGen.genKeyPair();
+					PrivateKey privateKey = keypair.getPrivate();
+//					System.out.println(privateKey);
+					PublicKey publicKey_Server = keypair.getPublic();
+					PublicKey publicKey_Client;
+//					System.out.println(publicKey_Server);
+//					System.out.println(publicKey_Client);
+
+/*					try{	
+						
+						ObjectInputStream obIn = new ObjectInputStream(socket.getInputStream());
+						ObjectOutputStream obOut = new ObjectOutputStream(socket.getOutputStream());
+						Object obj = obIn.readObject();
+						publicKey_Client = (PublicKey) obj;
+						obOut.writeObject(publicKey_Server);
+						obOut.flush();
+					}catch(NoSuchElementException e){
+						
+					}
+	*/				
+				}
+				
 
 				String user = "unknown";
 				String password = "unknown";
