@@ -18,6 +18,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.File;
 
 
 public class Client {
@@ -106,20 +109,69 @@ public class Client {
         cia_check.println(cia);
         System.out.println("--------------------------------------------------------");
 
-        /*  Integrity
+        /*
+         *  Integrity
          *  If we have selected the security option it is at this point we need
          *  to generate a key pair and exchange public keys with the Server.
          */
         if(cia == 7 || cia == 6 || cia == 3 || cia == 2) {
             generateKeyPair();
-            sendPublicKey(socket);
+            //sendPublicKey();
+            // testing key grabber
             try {
-                recievePubicKey(socket);
-            } catch (ClassNotFoundException e) {
-                System.out.println("Error: Class not found...");
-            }
-     	}
+                // signature
+                byte[] data = "Digital Signature".getBytes();
+                Signature signature = Signature.getInstance("SHA256withRSA");
+                signature.initSign(privateKey);
+                signature.update(data);
+                byte[] signedData = signature.sign();
+                byte[] txt = "Testing this message".getBytes();
 
+                // combine arrays
+                ByteArrayOutputStream bstream = new ByteArrayOutputStream();
+                for(int i = 0; i < (txt.length + signedData.length); i++) {
+                    if(i < txt.length) {
+                        bstream.write(txt[i]);
+                    } else {
+                        bstream.write(signedData[i - txt.length]);
+                    }
+                }
+                byte[] final_msg = bstream.toByteArray();
+
+                // get signature to verify
+                ByteArrayOutputStream s_verify = new ByteArrayOutputStream();
+                for(int i = 0; i < signedData.length; i++) {
+                    s_verify.write(final_msg[txt.length + i]);
+                }
+                byte[] verify_this = s_verify.toByteArray();
+
+                // get original message
+                ByteArrayOutputStream s_txt = new ByteArrayOutputStream();
+                for(int i = 0; i < txt.length; i++) {
+                    s_txt.write(final_msg[i]);
+                }
+                byte[] txt_f = s_txt.toByteArray();
+                String txt_s = new String(txt_f);
+
+                // verify
+                sendPublicKey();
+                PublicKey pk_test = recievePubicKey();
+                signature.initVerify(pk_test);
+                signature.update(data);
+                if(signature.verify(verify_this)){
+                    System.out.println("Verified");
+                    System.out.println("MESSAGE: " + txt_s);
+                }else{
+                    System.out.println("Something is wrong");
+                }
+            } catch (NoSuchAlgorithmException e) {
+                System.out.println("No such algorithm exception...");
+            } catch (InvalidKeyException e) {
+                System.out.println("Invalid key exception...");
+            } catch (SignatureException e) {
+                System.out.println("Signature exception...");
+            }
+        }
 
         // listen for a response from the server
         while(true) {
@@ -180,19 +232,38 @@ public class Client {
     /*
      *
      */
-    private static void sendPublicKey(Socket socket) throws IOException {
-        ObjectOutputStream out_s = new ObjectOutputStream(socket.getOutputStream());
-        out_s.writeObject(publicKeyClient);
+    private static void sendPublicKey() throws IOException {
+        FileOutputStream f_out = new FileOutputStream("public_key.ser");
+		ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
+		obj_out.writeObject(publicKeyClient);
+		obj_out.close();
+        //ObjectOutputStream out_s = new ObjectOutputStream(socket.getOutputStream());
+        //out_s.writeObject(publicKeyClient);
     }
 
 
     /*
      *
      */
-    private static void recievePubicKey(Socket socket) throws IOException, ClassNotFoundException {
-        ObjectInputStream in_s = new ObjectInputStream(socket.getInputStream());
-        publicKeyServer = (PublicKey) in_s.readObject();
-    }
+    private static PublicKey recievePubicKey() {
+        File pk = new File("public_key.ser");
+        while (pk.length() == 0) {
+            // wait for file to contain something
+        }
+        try {
+            FileInputStream f_in = new FileInputStream(pk);
+            ObjectInputStream obj_in = new ObjectInputStream(f_in);
+            PublicKey publicKey_Client = (PublicKey) obj_in.readObject();
+            obj_in.close();
+            return publicKey_Client;
+        } catch (IOException e) {
+            System.out.println("Error: IOException...");
+            return null;
+        } catch (ClassNotFoundException e) {
+            System.out.println("Error: Class not found exception...");
+            return null;
+        }
+     }
 
     // prompts user for with security options
     private static int getCIA() {
@@ -240,7 +311,7 @@ public class Client {
      */
     private static void generateKeyPair() {
         try {
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
             keyGen.initialize(1024);
             KeyPair keypair = keyGen.genKeyPair();
             privateKey = keypair.getPrivate();

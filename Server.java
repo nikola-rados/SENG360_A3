@@ -293,6 +293,31 @@ public class Server{
         Key key = new SecretKeySpec(keyValue, ALGO);
         return key;
     }
+
+    /*
+     *
+     */
+    private static PublicKey recievePubicKey() {
+        File pk = new File("public_key.txt");
+        while (pk.length() == 0) {
+
+        }
+        try {
+            FileInputStream f_in = new FileInputStream("public_key.txt");
+            ObjectInputStream obj_in = new ObjectInputStream(f_in);
+            PublicKey publicKey_Client = (PublicKey) obj_in.readObject();
+            obj_in.close();
+            return publicKey_Client;
+        } catch (IOException e) {
+            System.out.println("Error: IOException...");
+            return null;
+        } catch (ClassNotFoundException e) {
+            System.out.println("Error: Class not found exception...");
+            return null;
+        }
+     }
+
+
     public static void main(String[] args) {
         try {
             int port = 7802;
@@ -300,10 +325,10 @@ public class Server{
 			Command_total = getCIA();
 			selected();
 			System.out.println("\nServer Started and listening to the port 7802\nReady for a client connection.");
-				
 
-			
-			
+
+
+
 
 			while(Running){
 				socket = serverSocket.accept();
@@ -314,7 +339,7 @@ public class Server{
 				recived_1 = scan1.nextLine();
 				int recived = Integer.parseInt(recived_1);
 				String returnMessage;
-				
+
 
 				if(recived==Command_total){
 					returnMessage = "Selected security properties were accepted";
@@ -332,10 +357,10 @@ public class Server{
 				}else{
 					System.out.println("Sent message to client: "+(returnMessage));
 				}
-				
-				
+
+
 				if(Integrity){
-				
+
 					// Generate a 1024-bit Digital Signature Algorithm (DSA) key pair
 					KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
 					keyGen.initialize(1024);
@@ -343,24 +368,24 @@ public class Server{
 					PrivateKey privateKey = keypair.getPrivate();
 //					System.out.println(privateKey);
 					PublicKey publicKey_Server = keypair.getPublic();
-					PublicKey publicKey_Client;
+					PublicKey publicKey_Client = recievePubicKey();
 //					System.out.println(publicKey_Server);
 //					System.out.println(publicKey_Client);
 
-/*					try{	
-						
+/*
+					try{
 						ObjectInputStream obIn = new ObjectInputStream(socket.getInputStream());
 						ObjectOutputStream obOut = new ObjectOutputStream(socket.getOutputStream());
 						Object obj = obIn.readObject();
+
 						publicKey_Client = (PublicKey) obj;
 						obOut.writeObject(publicKey_Server);
 						obOut.flush();
 					}catch(NoSuchElementException e){
-						
-					}
-	*/				
+
+					}*/
 				}
-				
+
 
 				String user = "unknown";
 				String password = "unknown";
@@ -381,13 +406,13 @@ public class Server{
 						} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 						}
-						
+
 						if(Confidentiality){
 								p.println(encrypt("Please input Password:"));
 						}else{
 								p.println("Please input Password:");
 						}
-		
+
 						System.out.println("Message sent to the client is: Please input Password");
 						try {
 							password = scan1.nextLine();
@@ -398,22 +423,22 @@ public class Server{
 								user = decrypt(user);
 								password = decrypt(password);
 						}
-												
+
 						if(check_user(user,password)) {
 							if(Confidentiality){
 								p.println(encrypt("Message sent to the client is: Username and Password accepted.  Instant Message initiated..."));
 							}else{
 								p.println("Message sent to the client is: Username and Password accepted.  Instant Message initiated...");
 
-							}	
+							}
 							checking_authentication=false;
 						} else {
 							if(Confidentiality){
 								p.println(encrypt("Username/Password is not vaild please try again"));
 							}else{
-								
+
 								p.println("Username/Password is not vaild please try again");
-						
+
 							}
 						}
 					}//while(checking authentication)
@@ -424,9 +449,9 @@ public class Server{
 				String reciver="";
 				String sender="";
 				while(communication){
-					
-					
-					
+
+
+
 					try {
 						reciver = scan1.nextLine();
 					} catch(NoSuchElementException e) {
@@ -434,7 +459,7 @@ public class Server{
 					}
 					if(Confidentiality){
 								reciver = decrypt(reciver);
-					}					
+					}
 					System.out.println("Client: "+ reciver);
 					try {
 							System.out.print("Server: ");
@@ -444,7 +469,7 @@ public class Server{
 							}
 						if(Confidentiality){
 							sender = encrypt(sender);
-						}	
+						}
 					}catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 					}
