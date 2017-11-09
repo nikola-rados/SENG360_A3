@@ -77,6 +77,10 @@ public class Server{
 	private static String filename = "secure.txt";
     private static final String DEFAULT_USER = "seng360";
     private static final String DEFAULT_PASS = "assignment3";
+	private static final String ALGO = "AES";
+    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e', '9'};
+
+
 
     /**
      *  This is the method that confirms what was requested
@@ -266,10 +270,7 @@ public class Server{
 
     }
 
-	private static final String ALGO = "AES";
-    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e', '9'};
-
-
+	
     public static String encrypt(String Data) throws Exception {
         Key key = generateKey();
         Cipher c = Cipher.getInstance(ALGO);
