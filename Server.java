@@ -80,6 +80,9 @@ public class Server{
     private static PrivateKey privateKey;
     private static PublicKey publicKey_Server;
     private static PublicKey publicKey_Client;
+    private static final String ALGO = "AES";
+    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e', '9'};
+
 
     /**
      *  This is the method that confirms what was requested
@@ -268,9 +271,6 @@ public class Server{
         }
 
     }
-
-	private static final String ALGO = "AES";
-    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e', '9'};
 
 
     public static String encrypt(String Data) throws Exception {
@@ -501,8 +501,6 @@ public class Server{
 					p.println(sender);
 					//System.out.println("Server: "+ sender);
 				}
-
-
 				Running =false;
 			}//while(Running)
         } catch (Exception e) {
