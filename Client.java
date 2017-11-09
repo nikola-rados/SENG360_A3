@@ -21,6 +21,12 @@ import java.io.ObjectInputStream;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.lang.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+
 
 
 public class Client {
@@ -31,82 +37,75 @@ public class Client {
     private static PublicKey publicKeyServer;
     private static Signature signature;
     private static byte[] digital_signature;
+	private static String check_file = "check_file.txt";
 
 
+	public static boolean compare_text(String to_check){
+
+		try{
+		FileReader fr = new FileReader(check_file); 
+		BufferedReader br = new BufferedReader(fr); 
+		String s;
+		s = br.readLine();
+		fr.close();  
+		if (bit_shift(to_check).equals(s)){
+			return true;
+		}
+        } catch (IOException e) {
+           System.out.println("Error in comparing text");
+
+		}
+
+		return false;
+		// check_file
+	 }
+	 
+	public static void write_text(String write_string){
+		File f = new File(check_file);
+        try {
+            boolean f_check = f.createNewFile();
+            if(f_check) {
+            } else {
+            }
+        } catch (IOException e) {
+           System.out.println("Error creating file");
+           e.printStackTrace();
+		}
+		
+		
+		try{		
+			FileWriter fileWriter = new FileWriter(check_file);
+			fileWriter.write(write_string);
+			fileWriter.flush();
+			fileWriter.close();
+
+		}catch(IOException e){
+             System.out.println("Error: write_text error...");
+		}
+	 }
+
+	public static String bit_shift(String change){
+		 StringBuilder msg = new StringBuilder(change);
+		 for (int i = 0; i < msg.length(); i ++) {
+			msg.setCharAt(i, (char) (msg.charAt(i) + 2));
+		}
+		return msg.toString();
+	}
+
+	
     /* MAIN */
     public static void main(String[] args) throws UnknownHostException, IOException {
-        //key test
-        /*
-        try {
-            // generate key pair
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(1024); // KeySize
-            KeyPair keyPair = keyPairGenerator.generateKeyPair();
-
-            // private/public key generation
-            PrivateKey privateKey1 = keyPair.getPrivate();
-            PublicKey publicKey1 = keyPair.getPublic();
-
-            // signature
-            byte[] data = "Digital Signature".getBytes();
-            Signature signature = Signature.getInstance("SHA256withRSA");
-            signature.initSign(privateKey1);
-            signature.update(data);
-            byte[] signedData = signature.sign();
-            byte[] txt = "Testing this message".getBytes();
-
-            // combine arrays
-            ByteArrayOutputStream bstream = new ByteArrayOutputStream();
-            for(int i = 0; i < (txt.length + signedData.length); i++) {
-                if(i < txt.length) {
-                    bstream.write(txt[i]);
-                } else {
-                    bstream.write(signedData[i - txt.length]);
-                }
-            }
-            byte[] final_msg = bstream.toByteArray();
-
-            // get signature to verify
-            ByteArrayOutputStream s_verify = new ByteArrayOutputStream();
-            for(int i = 0; i < signedData.length; i++) {
-                s_verify.write(final_msg[txt.length + i]);
-            }
-            byte[] verify_this = s_verify.toByteArray();
-
-            // get original message
-            ByteArrayOutputStream s_txt = new ByteArrayOutputStream();
-            for(int i = 0; i < txt.length; i++) {
-                s_txt.write(final_msg[i]);
-            }
-            byte[] txt_f = s_txt.toByteArray();
-            String txt_s = new String(txt_f);
-
-            // verify
-            signature.initVerify(publicKey1);
-            signature.update(data);
-            if(signature.verify(verify_this)){
-                System.out.println("Verified");
-                System.out.println("MESSAGE: " + txt_s);
-            }else{
-                System.out.println("Something is wrong");
-            }
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println("No such algorithm exception...");
-        } catch (InvalidKeyException e) {
-            System.out.println("Invalid key exception...");
-        } catch (SignatureException e) {
-            System.out.println("Signature exception...");
-        }
-        //------- */
 
         String msg, server_str, sig_str;
         String verified = "";
         Scanner scan_client = new Scanner(System.in);
         Socket socket = new Socket("127.0.0.1", 7802);
         Scanner scan_server = new Scanner(socket.getInputStream());
-
+		boolean Integrity = false;
         int cia = getCIA();
-
+		if (cia==2||cia==3||cia==6||cia==7){
+				Integrity = true;	
+		}
         // send server message containing triad number to check security protocols
         PrintStream cia_check = new PrintStream(socket.getOutputStream());
         cia_check.println(cia);
@@ -117,72 +116,14 @@ public class Client {
          *  If we have selected the security option it is at this point we need
          *  to generate a key pair and exchange public keys with the Server.
          */
-        if(cia == 7 || cia == 6 || cia == 3 || cia == 2) {
-            generateKeyPair();
-            sendPublicKey();
-            publicKeyServer = recievePubicKey();
-            createSignature();
-            // testing key grabber
-/*            try {
-                // signature
-                byte[] data = "Digital Signature".getBytes();
-                Signature signature = Signature.getInstance("SHA256withRSA");
-                signature.initSign(privateKey);
-                signature.update(data);
-                byte[] signedData = signature.sign();
-                byte[] txt = "Testing this message".getBytes();
-
-                // combine arrays
-                ByteArrayOutputStream bstream = new ByteArrayOutputStream();
-                for(int i = 0; i < (txt.length + signedData.length); i++) {
-                    if(i < txt.length) {
-                        bstream.write(txt[i]);
-                    } else {
-                        bstream.write(signedData[i - txt.length]);
-                    }
-                }
-                byte[] final_msg = bstream.toByteArray();
-
-                // get signature to verify
-                ByteArrayOutputStream s_verify = new ByteArrayOutputStream();
-                for(int i = 0; i < signedData.length; i++) {
-                    s_verify.write(final_msg[txt.length + i]);
-                }
-                byte[] verify_this = s_verify.toByteArray();
-
-                // get original message
-                ByteArrayOutputStream s_txt = new ByteArrayOutputStream();
-                for(int i = 0; i < txt.length; i++) {
-                    s_txt.write(final_msg[i]);
-                }
-                byte[] txt_f = s_txt.toByteArray();
-                String txt_s = new String(txt_f);
-
-                // verify
-                sendPublicKey();
-                PublicKey pk_test = recievePubicKey();
-                signature.initVerify(pk_test);
-                signature.update(data);
-                if(signature.verify(verify_this)){
-                    System.out.println("Verified");
-                    System.out.println("MESSAGE: " + txt_s);
-                }else{
-                    System.out.println("Something is wrong");
-                }
-            } catch (NoSuchAlgorithmException e) {
-                System.out.println("No such algorithm exception...");
-            } catch (InvalidKeyException e) {
-                System.out.println("Invalid key exception...");
-            } catch (SignatureException e) {
-                System.out.println("Signature exception...");
-            }*/
-        }
+ 
+        
 
         // listen for a response from the server
         while(true) {
             try {
                 server_str = scan_server.nextLine();
-                System.out.println(server_str);
+               // System.out.println(server_str);
                 // Confidentiality check
                 if(cia >= 4) {
                     try {
@@ -190,44 +131,31 @@ public class Client {
                     } catch (Exception e) {
                         System.out.println("Error: Unable to decrypt message");
                     }
-                }
-                System.out.println(server_str);
-                // Integrity loop check
-                if (cia == 7 || cia == 6 || cia == 3 || cia == 2) {
-                    // this var is the digital signature from the server
-                    sig_str = scan_server.nextLine();
-                    System.out.println(sig_str);
-                    byte[] tobeverified = sig_str.getBytes();
-                    try {
-                        signature.initVerify(publicKeyServer);
-                        byte[] data = "Digital Signature".getBytes();
-                        signature.update(data);
-                        if (signature.verify(tobeverified)) {
-                            verified = "(VERIFIED)";
-                            System.out.println("VERIII");
-                        } else {
-                            verified = "(UNVERIFIED)";
-                            System.out.println("NOT VERIII");
-                        }
-                    } catch (SignatureException e) {
-                        System.out.println("Error: Signature Exception...1");
-                        e.printStackTrace();
-                    } catch (InvalidKeyException e) {
-                        System.out.println("Error: Invalid key Exception...");
-                    }
+                }else{
+					
+				}
+				if (Integrity){
+					if (compare_text(server_str)){
+						System.out.println("Server: "+server_str+ " (Verified)");
+					}else{
+						System.out.println("Server: "+server_str+ " (not Verified)");
+					}					
+				}else{
+					System.out.println("Server: "+server_str);
 
-                }
-                System.out.println("Server: " + server_str + " " + verified);
+				}
+				
             }
             catch(NoSuchElementException e) {
                 System.out.println("--- No message sent ---");
                 System.out.println("Exiting Program...");
                 break;
             }
+//            System.out.println("line 210");
 
             // first iteration needs to check for the confirmation message
             if(server_str.contains("Selected security properties were accepted")) {
-                continue;
+	           continue;
             } else if(server_str.contains("Selected security properties were denied")){
                 System.out.println("Exiting Program...");
                 break;
@@ -245,100 +173,43 @@ public class Client {
                 break;
             }
 
-            // Confidentiality check
+			
+			
+			
+			
             if(cia >= 4) {
+				if(Integrity){
+					String into_file;
+					into_file = bit_shift(msg);
+					write_text (into_file);
+				}
                 try {
                     msg = encrypt(msg);
                 } catch (Exception e) {
                     System.out.println("Error: Unable to encrypt message");
                 }
-            }
+            }else{
+				if(Integrity){
+					String into_file;
+					into_file = bit_shift(msg);
+					write_text (into_file);
+				}else{
+					
+				}
+			}
 
             // send messag to Server
             PrintStream client_out = new PrintStream(socket.getOutputStream());
             client_out.println(msg);
             // Integrity check
-            if(cia == 7 || cia == 6 || cia == 3 || cia == 2) {
-                String out = new String(digital_signature);
-                client_out.println(out);
-            }
+      
         }
     } // end main
 
 
-    /*
-     *
-     */
-    private static void createSignature() {
-        // signature
-        try {
-            byte[] data = "Digital Signature".getBytes();
-            signature = Signature.getInstance("SHA256withRSA");
-            signature.initSign(privateKey);
-            signature.update(data);
-            digital_signature = signature.sign();
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println("No such algorithm exception...");
-        } catch (InvalidKeyException e) {
-            System.out.println("Invalid key exception...");
-        } catch (SignatureException e) {
-            System.out.println("Signature exception...2");
-        }
-    }
-
-    /*
-     *
-     */
-    private static String extractMessage(String full_msg) {
-        // separate the message from the signature
-        byte[] msg_b = full_msg.getBytes();
-        System.out.println("FULL MESSAGE LENGTH WHEN RECEIVING: " + msg_b.length);
-        ByteArrayOutputStream s_txt = new ByteArrayOutputStream();
-        for(int i = 0; i < (msg_b.length - 128); i++) {
-            s_txt.write(msg_b[i]);
-        }
-        byte[] txt_f = s_txt.toByteArray();
-        String txt_s = new String(txt_f);
-        return txt_s;
-    }
+ 
 
 
-    /*
-     *
-     */
-    private static void sendPublicKey() throws IOException {
-        FileOutputStream f_out = new FileOutputStream("publicKey_Client.txt");
-		ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
-		obj_out.writeObject(publicKeyClient);
-		obj_out.close();
-    }
-
-
-    /*
-     *
-     */
-    private static PublicKey recievePubicKey() {
-        File pk = new File("publicKey_Server.txt");
-        while (pk.length() == 0) {
-            // wait for file
-        }
-        System.out.println("File Found...");
-        try {
-            FileInputStream f_in = new FileInputStream("publicKey_Server.txt");
-            ObjectInputStream obj_in = new ObjectInputStream(f_in);
-            PublicKey publicKey_Client = (PublicKey) obj_in.readObject();
-            obj_in.close();
-            //pk.delete();
-            return publicKey_Client;
-        } catch (IOException e) {
-            System.out.println("Error: IOException...1");
-            e.printStackTrace();
-            return null;
-        } catch (ClassNotFoundException e) {
-            System.out.println("Error: Class not found exception...");
-            return null;
-        }
-     }
 
     // prompts user for with security options
     private static int getCIA() {
@@ -380,22 +251,6 @@ public class Client {
         }
         return triad;
     }
-
-    /*
-     *  Create key pairing public/private.
-     */
-    private static void generateKeyPair() {
-        try {
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-            keyGen.initialize(1024);
-            KeyPair keypair = keyGen.genKeyPair();
-            privateKey = keypair.getPrivate();
-            publicKeyClient = keypair.getPublic();
-        } catch (Exception e) {
-            System.out.println("Error:");
-        }
-    }
-
 
     /*
      *  Encrypting method for messages

@@ -42,6 +42,7 @@ import javax.crypto.*;
 import java.security.Provider;
 import javax.crypto.Cipher;
 import java.io.PrintStream;
+import java.lang.*;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
@@ -85,7 +86,7 @@ public class Server{
 	private static Signature signature;
 	private static byte[] dsig;
 	private static byte[] client_sig;
-
+	private static String check_file = "check_file.txt";
 
     /**
      *  This is the method that confirms what was requested
@@ -301,82 +302,57 @@ public class Server{
     }
 
 
-    /*
-     *
-     */
-    private static void sendPublicKey() throws IOException {
-        FileOutputStream f_out = new FileOutputStream("publicKey_Server.txt");
-		ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
-		obj_out.writeObject(publicKey_Server);
-		obj_out.close();
-    }
-
-
-    /*
-     *
-     */
-    private static PublicKey recievePubicKey() {
-        File pk = new File("publicKey_Client.txt");
-        while (pk.length() == 0) {
-            // here we just wait
-        }
-        System.out.println("File Found...");
-        try {
-            FileInputStream f_in = new FileInputStream("publicKey_Client.txt");
-            ObjectInputStream obj_in = new ObjectInputStream(f_in);
-            PublicKey publicKey_Client = (PublicKey) obj_in.readObject();
-            obj_in.close();
-            //pk.delete();
-            return publicKey_Client;
+	public static boolean compare_text(String to_check){
+		try{
+		FileReader fr = new FileReader(check_file); 
+		BufferedReader br = new BufferedReader(fr); 
+		String s;
+		s = br.readLine();
+		fr.close();  
+		if (bit_shift(to_check).equals(s)){
+			return true;
+		}
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        } catch (ClassNotFoundException e) {
-            System.out.println("Error: Class not found exception...");
-            return null;
+           System.out.println("Error in comparing text");
+
+		}
+
+		return false;
+		// check_file
+	 }
+	 
+	 public static void write_text(String write_string){
+		File f = new File(check_file);
+        try {
+            boolean f_check = f.createNewFile();
+            if(f_check) {
+            } else {
+            }
+        } catch (IOException e) {
+           System.out.println("Error creating file");
+           e.printStackTrace();
         }
-     }
+		
+		
+		try{		
+			FileWriter fileWriter = new FileWriter(check_file);
+			fileWriter.write(write_string);
+			fileWriter.flush();
+			fileWriter.close();
 
-     /*
-      *
-      */
-     private static String signString(String unsigned) {
-         // signature
-         try {
-             byte[] data = "Digital Signature".getBytes();
-             Signature signature = Signature.getInstance("SHA256withRSA");
-             signature.initSign(privateKey);
-             signature.update(data);
-             byte[] signedData = signature.sign();
-             System.out.println("LENGTH OF SIGNATURE IN SERVER: " + signedData.length);
-             byte[] txt = unsigned.getBytes();
-             System.out.println("LENGTH OF MESSAGE IN SERVER: " + txt.length);
+		}catch(IOException e){
+             System.out.println("Error: write_text error...");
+		}
+	 }
 
-             // combine arrays
-             ByteArrayOutputStream bstream = new ByteArrayOutputStream();
-             for(int i = 0; i < (txt.length + signedData.length); i++) {
-                 if(i < txt.length) {
-                     bstream.write(txt[i]);
-                 } else {
-                     bstream.write(signedData[i - txt.length]);
-                 }
-             }
-             byte[] final_msg = bstream.toByteArray();
-             System.out.println("LENGTH OF MESSAGE BEFORE SENDING: " + final_msg.length);
-             String msg_out = new String(final_msg);
-             return msg_out;
-         } catch (NoSuchAlgorithmException e) {
-             System.out.println("Error: No such algorithm...");
-         } catch (InvalidKeyException e) {
-             System.out.println("Error: Invalid key exception... here");
-         } catch (SignatureException e) {
-             System.out.println("Error: Signature exception...");
-         }
-         // we should return before this, this is for errors
-         return null;
-     }
-
-
+	 public static String bit_shift(String change){
+		 StringBuilder msg = new StringBuilder(change);
+		 for (int i = 0; i < msg.length(); i ++) {
+			msg.setCharAt(i, (char) (msg.charAt(i) + 2));
+		}
+		return msg.toString();
+	 }
+	 
     public static void main(String[] args) {
         try {
             int port = 7802;
@@ -395,37 +371,31 @@ public class Server{
 				int recived = Integer.parseInt(recived_1);
 				String returnMessage;
 
-                if(Integrity){
-                    // Generate a 1024-bit Digital Signature Algorithm (DSA) key pair
-                    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-                    keyGen.initialize(1024);
-                    KeyPair keypair = keyGen.genKeyPair();
-                    privateKey = keypair.getPrivate();
-                    publicKey_Server = keypair.getPublic();
-                    publicKey_Client = recievePubicKey();
-                    sendPublicKey();
-					byte[] data = "Digital Signature".getBytes();
-					signature = Signature.getInstance("SHA256withRSA");
-					signature.initSign(privateKey);
-					signature.update(data);
-					dsig = signature.sign();
-                }
-				String tempsig = new String();
-
+  
 				if(recived==Command_total){
 					returnMessage = "Selected security properties were accepted";
 				}else{
 					returnMessage = "Selected security properties were denied";
 				}
+				
+				//sending the return message
 				if(Confidentiality){
+					if(Integrity){
+						String into_file;
+						into_file = bit_shift(returnMessage);
+						write_text (into_file);
+					}
 					returnMessage = encrypt(returnMessage);
-				}
-				p.println(returnMessage);
-				if(Integrity){
-					String signedData = new String(dsig);
-					p.println(signedData);
+				}else{
+					if(Integrity){
+						String into_file;
+						into_file = bit_shift(returnMessage);
+						write_text (into_file);
+					}
+					p.println(returnMessage);
 				}
 
+				//printing to screen
 				if(Confidentiality){
 					System.out.println("Sent message to client: "+decrypt(returnMessage));
 				}else{
@@ -439,112 +409,136 @@ public class Server{
                     generateUserPass(DEFAULT_USER, DEFAULT_PASS);
 					boolean checking_authentication = true;
 					while(checking_authentication) {
+						//request username
 						if(Confidentiality){
-								p.println(encrypt("Please input Username:"));
-								if(Integrity){
-									String signedData = new String(dsig);
-									p.println(signedData);
-								}
-						} else {
-                            p.println("Please input Username:");
 							if(Integrity){
-								String signedData = new String(dsig);
-								p.println(signedData);
+									String into_file;
+									into_file = bit_shift("Please input Username:");
+									write_text (into_file);
 							}
+							p.println(encrypt("Please input Username:"));
+						} else {
+							if(Integrity){
+									String into_file;
+									into_file = bit_shift("Please input Username:");
+									write_text (into_file);
+							}
+                            p.println("Please input Username:");
 						}
+						
+						//username grab
 						System.out.println("Message sent to the client is: Please input Username");
-
 						try {
 							user = scan1.nextLine();
 						} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 						}
-						if (Integrity){
-							try{
-								tempsig = scan1.nextLine();
-							}catch(NoSuchElementException e){
-								System.out.println("should never get here");
-							}
-							client_sig = tempsig.getBytes();
-							signature.initVerify(publicKey_Client);
-							if(signature.verify(client_sig)){
-								System.out.println("Client Signature Verified");
-							}else{
-								System.out.println("Something is wrong with Verifcation");
-							}
-						}
-
+						
 						if(Confidentiality){
-								p.println(encrypt("Please input Password:"));
-								if(Integrity){
-									String signedData = new String(dsig);
-									p.println(signedData);
-								}
+								user = decrypt(user);
+						}
+						//checks integrity
+						if (Integrity){
+							if (compare_text(user)){
+								System.out.println("Client: (sent a Username)"+ " (Verified)");
+							}else{
+								System.out.println("Client: (sent a Username)"+ " (not Verified)");
+							}					
+						}
+						
+						//request pass
+						if(Confidentiality){
+							if(Integrity){
+									String into_file;
+									into_file = bit_shift("Please input Password:");
+									write_text (into_file);
+							}
+							p.println(encrypt("Please input Password:"));
 						}else{
-								p.println("Please input Password:");
-								if(Integrity){
-									String signedData = new String(dsig);
-									p.println(signedData);
-								}
+							if(Integrity){
+									String into_file;
+									into_file = bit_shift("Please input Password:");
+									write_text (into_file);
+							}
+							p.println("Please input Password:");
 						}
 
+
+						//password grab
 						System.out.println("Message sent to the client is: Please input Password");
 						try {
 							password = scan1.nextLine();
 						} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 						}
-						if (Integrity){
-							try{
-								tempsig = scan1.nextLine();
-							}catch(NoSuchElementException e){
-								System.out.println("should never get here");
-							}
-							client_sig = tempsig.getBytes();
-							signature.initVerify(publicKey_Client);
-							if(signature.verify(client_sig)){
-								System.out.println("Client Signature Verified");
-							}else{
-								System.out.println("Something is wrong with Verifcation");
-							}
-						}
+						
 						if(Confidentiality){
-								user = decrypt(user);
 								password = decrypt(password);
 						}
+		
 
+						//checks integrity
+						if (Integrity){
+							if (compare_text(password)){
+								System.out.println("Client: (sent a password)"+ " (Verified)");
+							}else{
+								System.out.println("Client: (sent a password)"+ " (not Verified)");
+							}					
+						}
+
+						
+						
+						//checks the user and pass
 						if(check_user(user,password)) {
 							if(Confidentiality){
-								p.println(encrypt("Message sent to the client is: Username and Password accepted.  Instant Message initiated..."));
 								if(Integrity){
-									String signedData = new String(dsig);
-									p.println(signedData);
+									String into_file;
+									into_file = bit_shift("Username and Password accepted.  Instant Message initiated...");
+									write_text (into_file);
 								}
+								p.println(encrypt("Username and Password accepted.  Instant Message initiated..."));
 							}else{
-								p.println("Message sent to the client is: Username and Password accepted.  Instant Message initiated...");
 								if(Integrity){
-									String signedData = new String(dsig);
-									p.println(signedData);
+									String into_file;
+									into_file = bit_shift("Username and Password accepted.  Instant Message initiated...");
+									write_text (into_file);
 								}
+								p.println("Username and Password accepted.  Instant Message initiated...");
+								
 							}
+							System.out.println("Username and Password accepted.  Instant Message initiated...");
+
 							checking_authentication=false;
 						} else {
 							if(Confidentiality){
-								p.println(encrypt("Username/Password is not vaild please try again"));
 								if(Integrity){
-									String signedData = new String(dsig);
-									p.println(signedData);
+									String into_file;
+									into_file = bit_shift("Username/Password is not vaild please try again");
+									write_text (into_file);
 								}
+								p.println(encrypt("Username/Password is not vaild please try again"));
+								
 							}else{
+								if(Integrity){
+									String into_file;
+									into_file = bit_shift("Username/Password is not vaild please try again");
+									write_text (into_file);
+								}
 								p.println("Username/Password is not vaild please try again");
 								if(Integrity){
-									String signedData = new String(dsig);
-									p.println(signedData);
 								}
 							}
 						}
+					
 					}//while(checking authentication)
 				} else {
+					if(Integrity){
+								String into_file;
+								into_file = bit_shift("Authentication not selected");
+								write_text (into_file);
+					}
+					p.println("Authentication not selected");
+
 					System.out.println("Since Authentication was not choosen the defualt username and password are UNKNOWN");
 				}
 				boolean communication = true;
@@ -556,24 +550,30 @@ public class Server{
 					} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 					}
-					if (Integrity){
-							try{
-								tempsig = scan1.nextLine();
-							}catch(NoSuchElementException e){
-								System.out.println("should never get here");
-							}
-							client_sig = tempsig.getBytes();
-							signature.initVerify(publicKey_Client);
-							if(signature.verify(client_sig)){
-								System.out.println("Client Signature Verified");
-							}else{
-								System.out.println("Something is wrong with Verifcation");
-							}
-					}
+					
 					if(Confidentiality){
-								reciver = decrypt(reciver);
+						reciver = decrypt(reciver);
+						if (Integrity){
+							if (compare_text(reciver)){
+								System.out.println("Client: "+reciver+ " (Verified)");
+							}else{
+								System.out.println("Client: "+reciver+ " (not Verified)");
+							}					
+						}
+
+					}else{
+						if (Integrity){
+							if (compare_text(reciver)){
+								System.out.println("Client: "+reciver+ " (Verified)");
+							}else{
+								System.out.println("Client: "+reciver+ " (not Verified)");
+							}					
+						}else{
+							System.out.println("Client: "+ reciver);
+						}
 					}
-					System.out.println("Client: "+ reciver);
+					
+					//grabing what the server says next
 					try {
 							System.out.print("Server: ");
 							sender = message.nextLine();
@@ -581,16 +581,27 @@ public class Server{
 								break;
 							}
 						if(Confidentiality){
+							if(Integrity){
+								String into_file;
+								into_file = bit_shift(sender);
+								write_text (into_file);
+							}
 							sender = encrypt(sender);
+							p.println(sender);
+
+						}else{
+							if(Integrity){
+								String into_file;
+								into_file = bit_shift(sender);
+								write_text (into_file);
+							}
+							p.println(sender);
 						}
 					}catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 					}
-					p.println(sender);
-					if(Integrity){
-									String signedData = new String(dsig);
-									p.println(signedData);
-					}
+					
+
 					//System.out.println("Server: "+ sender);
 				}
 				Running =false;
