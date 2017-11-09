@@ -400,6 +400,16 @@ public class Server{
                     publicKey_Server = keypair.getPublic();
                     publicKey_Client = recievePubicKey();
                     sendPublicKey();
+					byte[] data = "Digital Signature".getBytes();
+					Signature signature = Signature.getInstance("SHA256withRSA");
+					signature.initSign(privateKey);
+					signature.update(data);
+					byte[] dsig = signature.sign();
+					String signedData = new String(dsig);
+					String tempsig = new String();
+					byte[] client_sig;
+
+
                 }
 
 				if(recived==Command_total){
@@ -411,6 +421,9 @@ public class Server{
 					returnMessage = encrypt(returnMessage);
 				}
 				p.println(returnMessage);
+				if(Integrity){
+					p.println(signedData);
+				}
 
 				if(Confidentiality){
 					System.out.println("Sent message to client: "+decrypt(returnMessage));
@@ -427,8 +440,14 @@ public class Server{
 					while(checking_authentication) {
 						if(Confidentiality){
 								p.println(encrypt("Please input Username:"));
+								if(Integrity){
+									p.println(signedData);
+								}
 						} else {
                             p.println("Please input Username:");
+							if(Integrity){
+									p.println(signedData);
+							}
 						}
 						System.out.println("Message sent to the client is: Please input Username");
 
@@ -437,11 +456,30 @@ public class Server{
 						} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 						}
+						if (Integrity){
+							try{
+								tempsig = scan1.nextLine();
+							}catch(NoSuchElementException e){
+								System.out.println("should never get here");
+							}
+							client_sig = tempsig.getBytes();
+							if(signature.verify(client_sig)){
+								System.out.println("Client Signature Verified");
+							}else{
+								System.out.println("Something is wrong with Verifcation");
+							}
+						}
 
 						if(Confidentiality){
 								p.println(encrypt("Please input Password:"));
+								if(Integrity){
+									p.println(signedData);
+								}
 						}else{
 								p.println("Please input Password:");
+								if(Integrity){
+									p.println(signedData);
+								}
 						}
 
 						System.out.println("Message sent to the client is: Please input Password");
@@ -449,6 +487,19 @@ public class Server{
 							password = scan1.nextLine();
 						} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
+						}
+						if (Integrity){
+							try{
+								tempsig = scan1.nextLine();
+							}catch(NoSuchElementException e){
+								System.out.println("should never get here");
+							}
+							client_sig = tempsig.getBytes();
+							if(signature.verify(client_sig)){
+								System.out.println("Client Signature Verified");
+							}else{
+								System.out.println("Something is wrong with Verifcation");
+							}
 						}
 						if(Confidentiality){
 								user = decrypt(user);
@@ -458,15 +509,27 @@ public class Server{
 						if(check_user(user,password)) {
 							if(Confidentiality){
 								p.println(encrypt("Message sent to the client is: Username and Password accepted.  Instant Message initiated..."));
+								if(Integrity){
+									p.println(signedData);
+								}
 							}else{
 								p.println("Message sent to the client is: Username and Password accepted.  Instant Message initiated...");
+								if(Integrity){
+									p.println(signedData);
+								}
 							}
 							checking_authentication=false;
 						} else {
 							if(Confidentiality){
 								p.println(encrypt("Username/Password is not vaild please try again"));
+								if(Integrity){
+									p.println(signedData);
+								}
 							}else{
 								p.println("Username/Password is not vaild please try again");
+								if(Integrity){
+									p.println(signedData);
+								}
 							}
 						}
 					}//while(checking authentication)
@@ -481,6 +544,19 @@ public class Server{
 						reciver = scan1.nextLine();
 					} catch(NoSuchElementException e) {
 							System.out.println("should never get here");
+					}
+					if (Integrity){
+							try{
+								tempsig = scan1.nextLine();
+							}catch(NoSuchElementException e){
+								System.out.println("should never get here");
+							}
+							client_sig = tempsig.getBytes();
+							if(signature.verify(client_sig)){
+								System.out.println("Client Signature Verified");
+							}else{
+								System.out.println("Something is wrong with Verifcation");
+							}
 					}
 					if(Confidentiality){
 								reciver = decrypt(reciver);
@@ -499,6 +575,9 @@ public class Server{
 							System.out.println("should never get here");
 					}
 					p.println(sender);
+					if(Integrity){
+									p.println(signedData);
+					}
 					//System.out.println("Server: "+ sender);
 				}
 				Running =false;
