@@ -116,9 +116,10 @@ public class Client {
          */
         if(cia == 7 || cia == 6 || cia == 3 || cia == 2) {
             generateKeyPair();
-            //sendPublicKey();
+            sendPublicKey();
+            publicKeyServer = recievePubicKey();
             // testing key grabber
-            try {
+/*            try {
                 // signature
                 byte[] data = "Digital Signature".getBytes();
                 Signature signature = Signature.getInstance("SHA256withRSA");
@@ -170,7 +171,7 @@ public class Client {
                 System.out.println("Invalid key exception...");
             } catch (SignatureException e) {
                 System.out.println("Signature exception...");
-            }
+            }*/
         }
 
         // listen for a response from the server
@@ -184,6 +185,7 @@ public class Client {
                     } catch (Exception e) {
                         System.out.println("Error: Unable to decrypt message");
                     }
+                // Integrity
                 }
                 System.out.println("Server: " + server_str);
             }
@@ -232,13 +234,28 @@ public class Client {
     /*
      *
      */
+    private static String extractMessage(String full_msg) {
+        // separate the message from the signature
+        byte[] msg_b = full_msg.getBytes();
+        System.out.println("FULL MESSAGE LENGTH WHEN RECEIVING: " + msg_b.length);
+        ByteArrayOutputStream s_txt = new ByteArrayOutputStream();
+        for(int i = 0; i < (msg_b.length - 128); i++) {
+            s_txt.write(msg_b[i]);
+        }
+        byte[] txt_f = s_txt.toByteArray();
+        String txt_s = new String(txt_f);
+        return txt_s;
+    }
+
+
+    /*
+     *
+     */
     private static void sendPublicKey() throws IOException {
         FileOutputStream f_out = new FileOutputStream("public_key.ser");
 		ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
 		obj_out.writeObject(publicKeyClient);
 		obj_out.close();
-        //ObjectOutputStream out_s = new ObjectOutputStream(socket.getOutputStream());
-        //out_s.writeObject(publicKeyClient);
     }
 
 
@@ -248,13 +265,15 @@ public class Client {
     private static PublicKey recievePubicKey() {
         File pk = new File("public_key.ser");
         while (pk.length() == 0) {
-            // wait for file to contain something
+            System.out.println("Waiting for file");
         }
+        System.out.println("File Found...");
         try {
-            FileInputStream f_in = new FileInputStream(pk);
+            FileInputStream f_in = new FileInputStream("public_key.ser");
             ObjectInputStream obj_in = new ObjectInputStream(f_in);
             PublicKey publicKey_Client = (PublicKey) obj_in.readObject();
             obj_in.close();
+            pk.delete();
             return publicKey_Client;
         } catch (IOException e) {
             System.out.println("Error: IOException...");
@@ -315,9 +334,7 @@ public class Client {
             keyGen.initialize(1024);
             KeyPair keypair = keyGen.genKeyPair();
             privateKey = keypair.getPrivate();
-            //System.out.println(privateKey);
             publicKeyClient = keypair.getPublic();
-            //System.out.println(publicKeyClient);
         } catch (Exception e) {
             System.out.println("Error:");
         }
@@ -325,41 +342,13 @@ public class Client {
 
 
     /*
-     *
-     */
-/*    public static String sign(String plainText, PrivateKey privateKey) throws Exception {
-        Signature privateSignature = Signature.getInstance("SHA256withRSA");
-        privateSignature.initSign(privateKey);
-        privateSignature.update(plainText.getBytes("UTF_8"));
-
-        byte[] signature = privateSignature.sign();
-
-        return Base64.getEncoder().encodeToString(signature);
-    }*/
-
-
-    /*
-     *
-     */
-/*     public static boolean verify(String plainText, String signature, PublicKey publicKey) throws Exception {
-         Signature publicSignature = Signature.getInstance("SHA256withRSA");
-         publicSignature.initVerify(publicKey);
-         publicSignature.update(plainText.getBytes(UTF_8));
-
-         byte[] signatureBytes = Base64.getDecoder().decode(signature);
-
-         return publicSignature.verify(signatureBytes);
-     }*/
-
-
-    /*
      *  Encrypting method for messages
      */
-    public static String encrypt(String Data) throws Exception {
+    public static String encrypt(String data) throws Exception {
         Key key = generateKey();
         Cipher c = Cipher.getInstance(ALGO);
         c.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encVal = c.doFinal(Data.getBytes());
+        byte[] encVal = c.doFinal(data.getBytes());
         String encryptedValue = Base64.getEncoder().encodeToString(encVal);
         return encryptedValue;
     }

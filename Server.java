@@ -77,6 +77,9 @@ public class Server{
 	private static String filename = "secure.txt";
     private static final String DEFAULT_USER = "seng360";
     private static final String DEFAULT_PASS = "assignment3";
+    private static PrivateKey privateKey;
+    private static PublicKey publicKey_Server;
+    private static PublicKey publicKey_Client;
 
     /**
      *  This is the method that confirms what was requested
@@ -294,19 +297,33 @@ public class Server{
         return key;
     }
 
+
+    /*
+     *
+     */
+    private static void sendPublicKey() throws IOException {
+        FileOutputStream f_out = new FileOutputStream("public_key.ser");
+		ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
+		obj_out.writeObject(publicKey_Server);
+		obj_out.close();
+    }
+
+
     /*
      *
      */
     private static PublicKey recievePubicKey() {
-        File pk = new File("public_key.txt");
+        File pk = new File("public_key.ser");
         while (pk.length() == 0) {
-
+            // here we just wait
         }
+        System.out.println("File Found...");
         try {
-            FileInputStream f_in = new FileInputStream("public_key.txt");
+            FileInputStream f_in = new FileInputStream("public_key.ser");
             ObjectInputStream obj_in = new ObjectInputStream(f_in);
             PublicKey publicKey_Client = (PublicKey) obj_in.readObject();
             obj_in.close();
+            pk.delete();
             return publicKey_Client;
         } catch (IOException e) {
             System.out.println("Error: IOException...");
@@ -317,6 +334,44 @@ public class Server{
         }
      }
 
+     /*
+      *
+      */
+     private static String signString(String unsigned) {
+         // signature
+         try {
+             byte[] data = "Digital Signature".getBytes();
+             Signature signature = Signature.getInstance("SHA256withRSA");
+             signature.initSign(privateKey);
+             signature.update(data);
+             byte[] signedData = signature.sign();
+             System.out.println("LENGTH OF SIGNATURE IN SERVER: " + signedData.length);
+             byte[] txt = unsigned.getBytes();
+             System.out.println("LENGTH OF MESSAGE IN SERVER: " + txt.length);
+
+             // combine arrays
+             ByteArrayOutputStream bstream = new ByteArrayOutputStream();
+             for(int i = 0; i < (txt.length + signedData.length); i++) {
+                 if(i < txt.length) {
+                     bstream.write(txt[i]);
+                 } else {
+                     bstream.write(signedData[i - txt.length]);
+                 }
+             }
+             byte[] final_msg = bstream.toByteArray();
+             System.out.println("LENGTH OF MESSAGE BEFORE SENDING: " + final_msg.length);
+             String msg_out = new String(final_msg);
+             return msg_out;
+         } catch (NoSuchAlgorithmException e) {
+             System.out.println("Error: No such algorithm...");
+         } catch (InvalidKeyException e) {
+             System.out.println("Error: Invalid key exception... here");
+         } catch (SignatureException e) {
+             System.out.println("Error: Signature exception...");
+         }
+         // we should return before this, this is for errors
+         return null;
+     }
 
     public static void main(String[] args) {
         try {
@@ -325,10 +380,6 @@ public class Server{
 			Command_total = getCIA();
 			selected();
 			System.out.println("\nServer Started and listening to the port 7802\nReady for a client connection.");
-
-
-
-
 
 			while(Running){
 				socket = serverSocket.accept();
@@ -340,6 +391,16 @@ public class Server{
 				int recived = Integer.parseInt(recived_1);
 				String returnMessage;
 
+                if(Integrity){
+                    // Generate a 1024-bit Digital Signature Algorithm (DSA) key pair
+                    KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+                    keyGen.initialize(1024);
+                    KeyPair keypair = keyGen.genKeyPair();
+                    privateKey = keypair.getPrivate();
+                    publicKey_Server = keypair.getPublic();
+                    publicKey_Client = recievePubicKey();
+                    sendPublicKey();
+                }
 
 				if(recived==Command_total){
 					returnMessage = "Selected security properties were accepted";
@@ -349,43 +410,13 @@ public class Server{
 				if(Confidentiality){
 					returnMessage = encrypt(returnMessage);
 				}
-
-
 				p.println(returnMessage);
+
 				if(Confidentiality){
 					System.out.println("Sent message to client: "+decrypt(returnMessage));
 				}else{
 					System.out.println("Sent message to client: "+(returnMessage));
 				}
-
-
-				if(Integrity){
-
-					// Generate a 1024-bit Digital Signature Algorithm (DSA) key pair
-					KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
-					keyGen.initialize(1024);
-					KeyPair keypair = keyGen.genKeyPair();
-					PrivateKey privateKey = keypair.getPrivate();
-//					System.out.println(privateKey);
-					PublicKey publicKey_Server = keypair.getPublic();
-					PublicKey publicKey_Client = recievePubicKey();
-//					System.out.println(publicKey_Server);
-//					System.out.println(publicKey_Client);
-
-/*
-					try{
-						ObjectInputStream obIn = new ObjectInputStream(socket.getInputStream());
-						ObjectOutputStream obOut = new ObjectOutputStream(socket.getOutputStream());
-						Object obj = obIn.readObject();
-
-						publicKey_Client = (PublicKey) obj;
-						obOut.writeObject(publicKey_Server);
-						obOut.flush();
-					}catch(NoSuchElementException e){
-
-					}*/
-				}
-
 
 				String user = "unknown";
 				String password = "unknown";
@@ -396,8 +427,8 @@ public class Server{
 					while(checking_authentication) {
 						if(Confidentiality){
 								p.println(encrypt("Please input Username:"));
-						}else{
-								p.println("Please input Username:");
+						} else {
+                            p.println("Please input Username:");
 						}
 						System.out.println("Message sent to the client is: Please input Username");
 
@@ -429,16 +460,13 @@ public class Server{
 								p.println(encrypt("Message sent to the client is: Username and Password accepted.  Instant Message initiated..."));
 							}else{
 								p.println("Message sent to the client is: Username and Password accepted.  Instant Message initiated...");
-
 							}
 							checking_authentication=false;
 						} else {
 							if(Confidentiality){
 								p.println(encrypt("Username/Password is not vaild please try again"));
 							}else{
-
 								p.println("Username/Password is not vaild please try again");
-
 							}
 						}
 					}//while(checking authentication)
@@ -449,9 +477,6 @@ public class Server{
 				String reciver="";
 				String sender="";
 				while(communication){
-
-
-
 					try {
 						reciver = scan1.nextLine();
 					} catch(NoSuchElementException e) {
@@ -473,10 +498,8 @@ public class Server{
 					}catch(NoSuchElementException e) {
 							System.out.println("should never get here");
 					}
-
 					p.println(sender);
 					//System.out.println("Server: "+ sender);
-
 				}
 
 
