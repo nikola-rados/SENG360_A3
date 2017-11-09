@@ -305,7 +305,7 @@ public class Server{
      *
      */
     private static void sendPublicKey() throws IOException {
-        FileOutputStream f_out = new FileOutputStream("public_key.ser");
+        FileOutputStream f_out = new FileOutputStream("publicKey_Server.txt");
 		ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
 		obj_out.writeObject(publicKey_Server);
 		obj_out.close();
@@ -316,20 +316,20 @@ public class Server{
      *
      */
     private static PublicKey recievePubicKey() {
-        File pk = new File("public_key.ser");
+        File pk = new File("publicKey_Client.txt");
         while (pk.length() == 0) {
             // here we just wait
         }
         System.out.println("File Found...");
         try {
-            FileInputStream f_in = new FileInputStream("public_key.ser");
+            FileInputStream f_in = new FileInputStream("publicKey_Client.txt");
             ObjectInputStream obj_in = new ObjectInputStream(f_in);
             PublicKey publicKey_Client = (PublicKey) obj_in.readObject();
             obj_in.close();
-            pk.delete();
+            //pk.delete();
             return publicKey_Client;
         } catch (IOException e) {
-            System.out.println("Error: IOException...");
+            e.printStackTrace();
             return null;
         } catch (ClassNotFoundException e) {
             System.out.println("Error: Class not found exception...");
@@ -376,7 +376,7 @@ public class Server{
          return null;
      }
 
-	 
+
     public static void main(String[] args) {
         try {
             int port = 7802;

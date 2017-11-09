@@ -182,6 +182,7 @@ public class Client {
         while(true) {
             try {
                 server_str = scan_server.nextLine();
+                System.out.println(server_str);
                 // Confidentiality check
                 if(cia >= 4) {
                     try {
@@ -190,20 +191,27 @@ public class Client {
                         System.out.println("Error: Unable to decrypt message");
                     }
                 }
+                System.out.println(server_str);
                 // Integrity loop check
                 if (cia == 7 || cia == 6 || cia == 3 || cia == 2) {
                     // this var is the digital signature from the server
                     sig_str = scan_server.nextLine();
+                    System.out.println(sig_str);
                     byte[] tobeverified = sig_str.getBytes();
                     try {
                         signature.initVerify(publicKeyServer);
+                        byte[] data = "Digital Signature".getBytes();
+                        signature.update(data);
                         if (signature.verify(tobeverified)) {
                             verified = "(VERIFIED)";
+                            System.out.println("VERIII");
                         } else {
                             verified = "(UNVERIFIED)";
+                            System.out.println("NOT VERIII");
                         }
                     } catch (SignatureException e) {
-                        System.out.println("Error: Signature Exception...");
+                        System.out.println("Error: Signature Exception...1");
+                        e.printStackTrace();
                     } catch (InvalidKeyException e) {
                         System.out.println("Error: Invalid key Exception...");
                     }
@@ -274,7 +282,7 @@ public class Client {
         } catch (InvalidKeyException e) {
             System.out.println("Invalid key exception...");
         } catch (SignatureException e) {
-            System.out.println("Signature exception...");
+            System.out.println("Signature exception...2");
         }
     }
 
@@ -299,7 +307,7 @@ public class Client {
      *
      */
     private static void sendPublicKey() throws IOException {
-        FileOutputStream f_out = new FileOutputStream("public_key.ser");
+        FileOutputStream f_out = new FileOutputStream("publicKey_Client.txt");
 		ObjectOutputStream obj_out = new ObjectOutputStream(f_out);
 		obj_out.writeObject(publicKeyClient);
 		obj_out.close();
@@ -310,20 +318,21 @@ public class Client {
      *
      */
     private static PublicKey recievePubicKey() {
-        File pk = new File("public_key.ser");
+        File pk = new File("publicKey_Server.txt");
         while (pk.length() == 0) {
-            System.out.println("Waiting for file");
+            // wait for file
         }
         System.out.println("File Found...");
         try {
-            FileInputStream f_in = new FileInputStream("public_key.ser");
+            FileInputStream f_in = new FileInputStream("publicKey_Server.txt");
             ObjectInputStream obj_in = new ObjectInputStream(f_in);
             PublicKey publicKey_Client = (PublicKey) obj_in.readObject();
             obj_in.close();
-            pk.delete();
+            //pk.delete();
             return publicKey_Client;
         } catch (IOException e) {
-            System.out.println("Error: IOException...");
+            System.out.println("Error: IOException...1");
+            e.printStackTrace();
             return null;
         } catch (ClassNotFoundException e) {
             System.out.println("Error: Class not found exception...");
