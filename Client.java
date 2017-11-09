@@ -29,6 +29,8 @@ public class Client {
     private static PrivateKey privateKey;
     private static PublicKey publicKeyClient;
     private static PublicKey publicKeyServer;
+    private static Signature signature;
+    private static byte[] digital_signature;
 
 
     /* MAIN */
@@ -97,7 +99,8 @@ public class Client {
         }
         //------- */
 
-        String msg, server_str;
+        String msg, server_str, sig_str;
+        String verified = "";
         Scanner scan_client = new Scanner(System.in);
         Socket socket = new Socket("127.0.0.1", 7802);
         Scanner scan_server = new Scanner(socket.getInputStream());
@@ -118,6 +121,7 @@ public class Client {
             generateKeyPair();
             sendPublicKey();
             publicKeyServer = recievePubicKey();
+            createSignature();
             // testing key grabber
 /*            try {
                 // signature
@@ -173,7 +177,7 @@ public class Client {
                 System.out.println("Signature exception...");
             }*/
         }
-        //System.out.println("HAHAhHAHAHA");
+
         // listen for a response from the server
         while(true) {
             try {
@@ -185,9 +189,27 @@ public class Client {
                     } catch (Exception e) {
                         System.out.println("Error: Unable to decrypt message");
                     }
-                // Integrity
                 }
-                System.out.println("Server: " + server_str);
+                // Integrity loop check
+                if (cia == 7 || cia == 6 || cia == 3 || cia == 2) {
+                    // this var is the digital signature from the server
+                    sig_str = scan_server.nextLine();
+                    byte[] tobeverified = sig_str.getBytes();
+                    try {
+                        signature.initVerify(publicKeyServer);
+                        if (signature.verify(tobeverified)) {
+                            verified = "(VERIFIED)";
+                        } else {
+                            verified = "(UNVERIFIED)";
+                        }
+                    } catch (SignatureException e) {
+                        System.out.println("Error: Signature Exception...");
+                    } catch (InvalidKeyException e) {
+                        System.out.println("Error: Invalid key Exception...");
+                    }
+
+                }
+                System.out.println("Server: " + server_str + " " + verified);
             }
             catch(NoSuchElementException e) {
                 System.out.println("--- No message sent ---");
@@ -227,9 +249,34 @@ public class Client {
             // send messag to Server
             PrintStream client_out = new PrintStream(socket.getOutputStream());
             client_out.println(msg);
+            // Integrity check
+            if(cia == 7 || cia == 6 || cia == 3 || cia == 2) {
+                String out = new String(digital_signature);
+                client_out.println(out);
+            }
         }
     } // end main
 
+
+    /*
+     *
+     */
+    private static void createSignature() {
+        // signature
+        try {
+            byte[] data = "Digital Signature".getBytes();
+            signature = Signature.getInstance("SHA256withRSA");
+            signature.initSign(privateKey);
+            signature.update(data);
+            digital_signature = signature.sign();
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("No such algorithm exception...");
+        } catch (InvalidKeyException e) {
+            System.out.println("Invalid key exception...");
+        } catch (SignatureException e) {
+            System.out.println("Signature exception...");
+        }
+    }
 
     /*
      *
