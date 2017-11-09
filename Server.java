@@ -82,6 +82,9 @@ public class Server{
     private static PublicKey publicKey_Client;
     private static final String ALGO = "AES";
     private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e', '9'};
+	private static Signature signature;
+	private static byte[] dsig;
+	private static byte[] client_sig;
 
 
     /**
@@ -373,6 +376,7 @@ public class Server{
          return null;
      }
 
+	 
     public static void main(String[] args) {
         try {
             int port = 7802;
@@ -401,16 +405,12 @@ public class Server{
                     publicKey_Client = recievePubicKey();
                     sendPublicKey();
 					byte[] data = "Digital Signature".getBytes();
-					Signature signature = Signature.getInstance("SHA256withRSA");
+					signature = Signature.getInstance("SHA256withRSA");
 					signature.initSign(privateKey);
 					signature.update(data);
-					byte[] dsig = signature.sign();
-					String signedData = new String(dsig);
-					String tempsig = new String();
-					byte[] client_sig;
-
-
+					dsig = signature.sign();
                 }
+				String tempsig = new String();
 
 				if(recived==Command_total){
 					returnMessage = "Selected security properties were accepted";
@@ -422,6 +422,7 @@ public class Server{
 				}
 				p.println(returnMessage);
 				if(Integrity){
+					String signedData = new String(dsig);
 					p.println(signedData);
 				}
 
@@ -441,12 +442,14 @@ public class Server{
 						if(Confidentiality){
 								p.println(encrypt("Please input Username:"));
 								if(Integrity){
+									String signedData = new String(dsig);
 									p.println(signedData);
 								}
 						} else {
                             p.println("Please input Username:");
 							if(Integrity){
-									p.println(signedData);
+								String signedData = new String(dsig);
+								p.println(signedData);
 							}
 						}
 						System.out.println("Message sent to the client is: Please input Username");
@@ -463,6 +466,7 @@ public class Server{
 								System.out.println("should never get here");
 							}
 							client_sig = tempsig.getBytes();
+							signature.initVerify(publicKey_Client);
 							if(signature.verify(client_sig)){
 								System.out.println("Client Signature Verified");
 							}else{
@@ -473,11 +477,13 @@ public class Server{
 						if(Confidentiality){
 								p.println(encrypt("Please input Password:"));
 								if(Integrity){
+									String signedData = new String(dsig);
 									p.println(signedData);
 								}
 						}else{
 								p.println("Please input Password:");
 								if(Integrity){
+									String signedData = new String(dsig);
 									p.println(signedData);
 								}
 						}
@@ -495,6 +501,7 @@ public class Server{
 								System.out.println("should never get here");
 							}
 							client_sig = tempsig.getBytes();
+							signature.initVerify(publicKey_Client);
 							if(signature.verify(client_sig)){
 								System.out.println("Client Signature Verified");
 							}else{
@@ -510,11 +517,13 @@ public class Server{
 							if(Confidentiality){
 								p.println(encrypt("Message sent to the client is: Username and Password accepted.  Instant Message initiated..."));
 								if(Integrity){
+									String signedData = new String(dsig);
 									p.println(signedData);
 								}
 							}else{
 								p.println("Message sent to the client is: Username and Password accepted.  Instant Message initiated...");
 								if(Integrity){
+									String signedData = new String(dsig);
 									p.println(signedData);
 								}
 							}
@@ -523,11 +532,13 @@ public class Server{
 							if(Confidentiality){
 								p.println(encrypt("Username/Password is not vaild please try again"));
 								if(Integrity){
+									String signedData = new String(dsig);
 									p.println(signedData);
 								}
 							}else{
 								p.println("Username/Password is not vaild please try again");
 								if(Integrity){
+									String signedData = new String(dsig);
 									p.println(signedData);
 								}
 							}
@@ -552,6 +563,7 @@ public class Server{
 								System.out.println("should never get here");
 							}
 							client_sig = tempsig.getBytes();
+							signature.initVerify(publicKey_Client);
 							if(signature.verify(client_sig)){
 								System.out.println("Client Signature Verified");
 							}else{
@@ -576,6 +588,7 @@ public class Server{
 					}
 					p.println(sender);
 					if(Integrity){
+									String signedData = new String(dsig);
 									p.println(signedData);
 					}
 					//System.out.println("Server: "+ sender);
