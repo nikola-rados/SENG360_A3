@@ -78,14 +78,8 @@ public class Server{
 	private static String filename = "secure.txt";
     private static final String DEFAULT_USER = "seng360";
     private static final String DEFAULT_PASS = "assignment3";
-    private static PrivateKey privateKey;
-    private static PublicKey publicKey_Server;
-    private static PublicKey publicKey_Client;
     private static final String ALGO = "AES";
-    private static final byte[] keyValue = new byte[]{'Z', '4', 'e', 't', 'e', '_', 't', 'S', '-', '!', '2', '%', 't', 'K', 'e', '9'};
-	private static Signature signature;
-	private static byte[] dsig;
-	private static byte[] client_sig;
+    private static final byte[] keyValue = new byte[]{'N', '7', 'r', 's', 'v', '$', 'y', 'Q', '+', '%', '9', '@', 'g', 'F', 'p', '0'};
 	private static String check_file = "check_file.txt";
 
     /**
